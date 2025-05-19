@@ -9,6 +9,11 @@ const OnboardingPage: React.FC = ( ) => {
   const [step, setStep] = useState<'welcome' | 'phone' | 'code' | 'profile'>('welcome');
   const navigate = useNavigate();
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('isOnboarding', 'true');
+    navigate('/');
+  };
+
   if (step === 'welcome') {
     return <WelcomeScreen onStart={() => setStep('phone')} />;
   }
@@ -22,7 +27,7 @@ const OnboardingPage: React.FC = ( ) => {
   }
 
   if (step === 'profile') {
-    return <WelcomeProfileScreen onContinue={() => navigate('/')} />;
+    return <WelcomeProfileScreen onContinue={handleOnboardingComplete} />;
   }
 
   return null;

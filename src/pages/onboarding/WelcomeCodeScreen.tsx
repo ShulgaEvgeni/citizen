@@ -18,7 +18,7 @@ const WelcomeCodeScreen: React.FC<{ onSubmit: (code: string) => void }> = ({ onS
         <div className={styles.title}>Enter code</div>
         <Input
           type="text"
-          placeholder="Enter code"
+          placeholder="1234"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           onClear={() => setCode('')}
