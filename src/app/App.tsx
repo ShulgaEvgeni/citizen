@@ -40,7 +40,7 @@ const App: React.FC = () => {
   if (loading) return <SplashScreen />;
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename='citizen'>
       <Routes>
         <Route path="/" element={<MapPage />} />
         <Route path="/onboarding" element={<OnboardingPage  />} />
