@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react'; 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -466,8 +466,6 @@ const MapPage: React.FC = () => {
   const [showRealMap, setShowRealMap] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number] | null>(null);
-  const [message, setMessage] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
   const [activeIncident, setActiveIncident] = useState<typeof INCIDENTS[0] | null>(null);
   // Состояния для hover-эффекта
   const [hoverLeft, setHoverLeft] = useState(false);
@@ -481,8 +479,6 @@ const MapPage: React.FC = () => {
   const [commentImage, setCommentImage] = useState<string | null>(null);
   const [comments, setComments] = useState(COMMENTS);
   const navigate = useNavigate();
-  const [showClusterModal, setShowClusterModal] = useState(false);
-  const [clusterIncidents, setClusterIncidents] = useState([]);
 
   // Проверяем разрешение на геолокацию при монтировании
   useEffect(() => {
@@ -529,14 +525,6 @@ const MapPage: React.FC = () => {
     setShowRealMap(true);
   };
 
-  const handleSend = () => {
-    if (message.trim()) {
-      alert('Message sent: ' + message);
-      setMessage('');
-      inputRef.current?.focus();
-    }
-  };
-
   if (showRealMap  ) {
     return (
       <div style={{height: '100vh', width: '100vw', position: 'relative', paddingBottom: 90}}>
@@ -566,7 +554,7 @@ const MapPage: React.FC = () => {
             <div style={{flex: 1, overflowY: 'auto', padding: '0 0 16px 0'}}>
               {searchResult.length === 0 && <div style={{color: '#aaa', textAlign: 'center', marginTop: 32, fontSize: 18}}>Ничего не найдено</div>}
               {searchResult.map(item => (
-                <div key={item.id} onClick={() => { setFlyTo(item.position); setSearchOpen(false); }} style={{display: 'flex', alignItems: 'center', padding: '18px 20px', cursor: 'pointer', borderBottom: '1px solid #222'}}>
+                <div key={item.id} onClick={() => { setFlyTo(item.position as [number, number]); setSearchOpen(false); }} style={{display: 'flex', alignItems: 'center', padding: '18px 20px', cursor: 'pointer', borderBottom: '1px solid #222'}}>
                   <div style={{width: 44, height: 44, borderRadius: '50%', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 16}}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
                   </div>
@@ -631,12 +619,12 @@ const MapPage: React.FC = () => {
             </svg>
           </button>
         </div>
-        <MapContainer center={flyTo || position} zoom={16} style={{height: '100vh', width: '100vw', paddingBottom: 90}}>
+        <MapContainer center={(flyTo || position) as [number, number]} zoom={16} style={{height: '100vh', width: '100vw', paddingBottom: 90}}>
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a>"
           />
-          <Marker position={position}>
+          <Marker position={position as [number, number]}>
             <Popup>You are here</Popup>
           </Marker>
           {flyTo && <SetViewOnLocation position={flyTo} />}
@@ -646,10 +634,9 @@ const MapPage: React.FC = () => {
             {INCIDENTS.map(incident => (
               <Marker
                 key={incident.id}
-                position={incident.position}
+                position={incident.position as [number, number]}
                 eventHandlers={{ click: () => setActiveIncident(incident) }}
-                icon={getIncidentIcon(incident.image, incident.color)}
-                incidentData={incident}
+                icon={getIncidentIcon(incident.image, incident.color) as L.Icon}
               />
             ))} 
         </MapContainer>
@@ -752,7 +739,7 @@ const MapPage: React.FC = () => {
                   <button
                     onClick={() => {
                       if (commentText.trim() || commentImage) {
-                        setComments([...comments, { id: Date.now(), user: 'Вы', text: commentText, image: commentImage, time: 'только что' }]);
+                        setComments([...comments, { id: Date.now(), user: 'Вы', text: commentText, ...(commentImage ? { image: commentImage } : {}), time: 'только что' }]);
                         setCommentText('');
                         setCommentImage(null);
                       }
@@ -817,13 +804,6 @@ const MapPage: React.FC = () => {
               </div>
             </div>
           </>
-        )}
-        {showClusterModal && (
-          <Modal onClose={() => setShowClusterModal(false)}>
-            {clusterIncidents.map(incident => (
-              <IncidentCard key={incident.id} {...incident} />
-            ))}
-          </Modal>
         )}
       </div>
     );
