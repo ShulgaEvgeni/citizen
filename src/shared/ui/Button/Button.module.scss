@@ -1,0 +1,38 @@
+.button {
+  font-size: 20px;
+  font-weight: 600;
+  border: none;
+  border-radius: 32px;
+  padding: 18px 48px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.primary {
+  background: #ffd54f;
+  color: #111;
+
+  &:hover:not(:disabled) {
+    background: #ffe082;
+  }
+}
+
+.secondary {
+  background: #222;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #333;
+  }
+}
+
+.fullWidth {
+  width: 100%;
+  padding: 18px 0;
+} 

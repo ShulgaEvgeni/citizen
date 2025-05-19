@@ -1,0 +1,235 @@
+.root {
+  background: #000;
+  min-height: 100vh;
+  color: #fff;
+  font-family: 'SF Pro Display', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 16px 0 0;
+  background: #000;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.settingsBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.mapWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 32px 0 24px 0;
+  min-height: 220px;
+}
+
+.noNotifTitle {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.5px;
+}
+
+.noNotifDesc {
+  color: #aaa;
+  text-align: center;
+  font-size: 16px;
+  margin: 0 24px;
+  line-height: 1.5;
+}
+
+.desc {
+  color: #aaa;
+  font-size: 16px;
+  margin: 0 24px 24px 24px;
+  text-align: left;
+}
+
+.categoriesTitle {
+  color: #aaa;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 24px 8px 24px;
+  letter-spacing: 0.2px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0 0 0 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: none;
+  padding: 0 24px;
+  min-height: 64px;
+}
+
+.itemTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.itemDesc {
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  min-width: 48px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #23242a;
+  border-radius: 16px;
+  transition: background 0.2s;
+}
+
+.switch input:checked + .slider {
+  background: #1856f5;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+} 
+
+.backBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.recent {
+  color: #aaa;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 24px;
+  letter-spacing: 0.2px;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0 0 32px 0;
+}
+
+.notification {
+  background: none;
+  border-bottom: 1px solid #181818;
+  padding: 18px 24px 10px 24px;
+}
+
+.notificationTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.blueDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1856f5;
+  display: inline-block;
+}
+
+.redDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e53935;
+  display: inline-block;
+}
+
+.notificationTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.notificationDesc {
+  color: #aaa;
+  font-size: 16px;
+  margin-bottom: 8px;
+  margin-left: 18px;
+}
+
+.notificationMeta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: #888;
+  font-size: 15px;
+  margin-left: 18px;
+}
+
+.notificationTime {
+  min-width: 56px;
+}
+
+.metaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.7;
+}

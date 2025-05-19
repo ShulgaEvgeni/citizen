@@ -1,0 +1,74 @@
+.inputBlock {
+  margin-bottom: 18px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.label {
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  font-size: 20px;
+  padding: 18px 24px;
+  border-radius: 32px;
+  border: 2px solid #fff;
+  background: #222;
+  color: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border 0.2s;
+
+  &:focus {
+    border-color: #ffe082;
+  }
+
+  &.error {
+    border-color: #ff5252;
+  }
+}
+
+.clearButton {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.hint {
+  color: #aaa;
+  font-size: 14px;
+  margin: 4px 8px 0;
+}
+
+.errorText {
+  color: #ff5252;
+  font-size: 14px;
+  margin: 4px 8px 0;
+} 

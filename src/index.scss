@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  background: #fff;
+  color: #222;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #0056b3;
+  }
+} 
