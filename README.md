@@ -1,6 +1,6 @@
 # Демо на GitHub Pages
 
-[Открыть приложение на GitHub Pages](https://USER.github.io/REPO/)
+[Открыть приложение на GitHub Pages](https://ShulgaEvgeni.github.io/citizen/)
 
 ---
 
