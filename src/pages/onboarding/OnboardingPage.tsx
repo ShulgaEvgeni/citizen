@@ -5,7 +5,7 @@ import WelcomeCodeScreen from './WelcomeCodeScreen';
 import WelcomeProfileScreen from './WelcomeProfileScreen';
 import { useNavigate } from 'react-router-dom';
 
-const OnboardingPage: React.FC = ( ) => {
+const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState<'welcome' | 'phone' | 'code' | 'profile'>('welcome');
   const navigate = useNavigate();
 

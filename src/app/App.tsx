@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 // import HomePage from '../pages/home/HomePage';
 import AboutPage from '../pages/about/AboutPage';
 import styles from './App.module.scss';
 import OnboardingPage from '../pages/onboarding/OnboardingPage';
 // import { Button } from '../shared/ui';
+import SubscriptionModal from '../pages/subscription/SubscriptionPage';
 import MapPage from '../pages/map/MapPage';
 import NotificationsPage from '../pages/notifications/NotificationsPage';
 import NotificationsSettingsPage from '../pages/notifications/NotificationsSettingsPage';
@@ -26,41 +27,191 @@ const SplashScreen: React.FC = () => (
   </div>
 );
 
-const AppRoutes: React.FC = () => {
+const AppContent: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const isOnboardingCompleted = localStorage.getItem('isOnboarding');
-    if (!isOnboardingCompleted) {
+    
+    // Проверяем наличие isOnboarding в localStorage
+    const isOnboarding = localStorage.getItem('isOnboarding');
+    if (!isOnboarding) {
       navigate('/onboarding');
     }
+    
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   if (loading) return <SplashScreen />;
 
   return (
-    <Routes>
-      <Route path="/" element={<MapPage />} />
-      <Route path="/onboarding" element={<OnboardingPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/notifications/settings" element={<NotificationsSettingsPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/profile/edit" element={<EditProfilePage />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<MapPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/notifications/settings" element={<NotificationsSettingsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/edit" element={<EditProfilePage />} />
+      </Routes>
+      { (location.pathname === '/' || location.pathname.startsWith('/notifications')) && (
+        <div className={styles.bottomNav}>
+          <Link to="/" className={styles.bottomNavIcon} aria-label="Главная">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 17L18 8L29 17V28C29 29.1046 28.1046 30 27 30H9C7.89543 30 7 29.1046 7 28V17Z" stroke="#fff" strokeWidth="2.5" fill="none"/>
+            </svg>
+          </Link>
+          <div className={styles.bottomNavCenter}>
+            <button
+              className={styles.bottomNavCircle}
+              aria-label="Открыть модалку"
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              onClick={() => setModalOpen(true)}
+            >
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="28" fill="#1856f5"/>
+                <path d="M32 18C24.268 18 18 24.268 18 32V40C18 47.732 24.268 54 32 54C39.732 54 46 47.732 46 40V32C46 24.268 39.732 18 32 18Z" fill="white"/>
+                <circle cx="32" cy="32" r="5" fill="#1856f5"/>
+              </svg>
+            </button>
+          </div>
+          <Link to="/notifications" className={styles.bottomNavIcon} aria-label="Уведомления">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M27 25V16C27 11.0294 22.9706 7 18 7C13.0294 7 9 11.0294 9 16V25L7 27V29H29V27L27 25Z" stroke="#fff" strokeWidth="2.5" fill="none"/>
+              <circle cx="18" cy="31" r="2" fill="#fff"/>
+            </svg>
+          </Link>
+        </div>
+      )}
+      <SubscriptionModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mainContent={
+          <div
+            style={{
+              position: 'fixed',
+              zIndex: 1000,
+              left: 0,
+              top: 0,
+              width: '100vw',
+              height: '100vh', 
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}
+            onClick={() => setModalOpen(false)}
+          >
+            <div
+              style={{
+                background: '#181A20',
+                borderRadius: '24px 24px 0 0',
+                padding: 24,
+                maxWidth: 420,
+                width: '100%',
+                margin: 0,
+                color: '#fff',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
+                <div style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 60% 40%, #1856f5 60%, #181A20 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 8,
+                  boxShadow: '0 0 24px 8px #1856f5'
+                }}>
+                  {/* Заглушка-аватар */}
+                  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="50" fill="#23242a" />
+                    <ellipse cx="50" cy="45" rx="22" ry="18" fill="#444" />
+                    <ellipse cx="50" cy="78" rx="28" ry="14" fill="#444" />
+                    <ellipse cx="50" cy="45" rx="12" ry="10" fill="#888" />
+                  </svg>
+                </div>
+                <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Live Agents on duty</div>
+              </div>
+              <div style={{ fontWeight: 700, fontSize: 22, textAlign: 'center', marginBottom: 8 }}>
+                Get instant help from powerful safety agents
+              </div>
+              <div style={{ color: '#aaa', textAlign: 'center', marginBottom: 16 }}>
+                Demo Agent powers &rsaquo;
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginBottom: 24, justifyContent: 'center' }}>
+                <button style={{
+                  background: 'linear-gradient(135deg, #0a1a3a 60%, #1856f5 100%)',
+                  borderRadius: 16,
+                  border: 'none',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 18,
+                  padding: '24px 20px',
+                  minWidth: 140,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 2px 8px rgba(24,86,245,0.15)'
+                }}>
+                  <span style={{ fontSize: 28, marginBottom: 8 }}>🟦</span>
+                  Live Monitoring
+                </button>
+                <button style={{
+                  background: 'linear-gradient(135deg, #0a1a3a 60%, #1856f5 100%)',
+                  borderRadius: 16,
+                  border: 'none',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 18,
+                  padding: '24px 20px',
+                  minWidth: 140,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  boxShadow: '0 2px 8px rgba(24,86,245,0.15)'
+                }}>
+                  <span style={{ fontSize: 28, marginBottom: 8 }}>🎥</span>
+                  Video Call
+                </button>
+              </div>
+              <input
+                type="text"
+                disabled
+                value="Start Agent Chat"
+                style={{
+                  width: '100%',
+                  borderRadius: 16,
+                  background: '#23242a',
+                  color: '#888',
+                  border: 'none',
+                  padding: '16px 20px',
+                  fontSize: 18,
+                  fontWeight: 500,
+                  marginBottom: 0
+                }}
+              />
+            </div>
+          </div>
+        }
+        bottomContent={null}
+      />
+    </>
   );
 };
 
 const App: React.FC = () => {
   return (
     <BrowserRouter basename='citizen'>
-      <AppRoutes />
+      <AppContent />
     </BrowserRouter>
   );
 };
