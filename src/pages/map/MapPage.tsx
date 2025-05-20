@@ -555,7 +555,14 @@ const MapPage: React.FC = () => {
       navigator.mediaDevices.enumerateDevices().then(devices => {
         const videos = devices.filter(d => d.kind === 'videoinput');
         setVideoDevices(videos);
+        // Если есть камеры и currentDeviceId не выставлен, выставляем первую
+        if (videos.length > 0 && !currentDeviceId) {
+          setCurrentDeviceId(videos[0].deviceId);
+        }
       });
+    } else {
+      // Сброс currentDeviceId при закрытии модалки
+      setCurrentDeviceId(null);
     }
   }, [showGoLiveModal]);
 
@@ -587,7 +594,8 @@ const MapPage: React.FC = () => {
   // Функция для переключения камеры
   const handleSwitchCamera = () => {
     if (videoDevices.length > 1) {
-      const currentIdx = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
+      let currentIdx = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
+      if (currentIdx === -1) currentIdx = 0;
       const nextIdx = (currentIdx + 1) % videoDevices.length;
       setCurrentDeviceId(videoDevices[nextIdx].deviceId);
     }
@@ -1078,7 +1086,7 @@ const MapPage: React.FC = () => {
             {/* Нижняя панель */}
             <div style={{position: 'absolute', left: 0, right: 0, bottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48}}>
               {/* Кнопка переключения камеры, только если камер больше одной */}
-              {  (
+              {videoDevices.length > 1 && (
                 <button onClick={handleSwitchCamera} style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                   <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"/><path d="M18 12v-4m0 0l-3 3m3-3l3 3"/><path d="M18 24v4m0 0l-3-3m3 3l3-3"/></svg>
                 </button>
