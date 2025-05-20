@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom'; 
-
+import styles from './map.module.scss';
 const DEMO_FEATURES = [
   '24/7 access to a safety agent who can actively monitor your safety',
   'First responders sent to your exact location in an emergency',
@@ -462,11 +462,34 @@ function getIncidentIcon(image?: string, color?: string) {
   }
 }
 
+// Кастомная иконка местоположения пользователя
+function getUserLocationIcon() {
+  return L.divIcon({
+    className: 'user-location-icon',
+    html: `
+      <svg width="28" height="28" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="28" r="28" fill="#7fa88c"/>
+        <circle cx="28" cy="22" r="9" fill="#5b7f64"/>
+        <path d="M28 34c-9 0-16 4.5-16 9v1h32v-1c0-4.5-7-9-16-9z" fill="#5b7f64"/>
+      </svg>
+    `,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14],
+  });
+}
+
 const MapPage: React.FC = () => {
   const [showRealMap, setShowRealMap] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [activeIncident, setActiveIncident] = useState<typeof INCIDENTS[0] | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showGoLiveModal, setShowGoLiveModal] = useState(false);
+  const [cameraAllowed, setCameraAllowed] = useState<boolean | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
   // Состояния для hover-эффекта
   const [hoverLeft, setHoverLeft] = useState(false);
   const [hoverRight, setHoverRight] = useState(false);
@@ -478,6 +501,7 @@ const MapPage: React.FC = () => {
   const [commentText, setCommentText] = useState('');
   const [commentImage, setCommentImage] = useState<string | null>(null);
   const [comments, setComments] = useState(COMMENTS);
+  const [goLiveMarker, setGoLiveMarker] = useState<[number, number] | null>(null);
   const navigate = useNavigate();
 
   // Проверяем разрешение на геолокацию при монтировании
@@ -523,6 +547,65 @@ const MapPage: React.FC = () => {
         setError('Location permission denied.')}
     );
     setShowRealMap(true);
+  };
+
+  // Получаем список камер
+  useEffect(() => {
+    if (showGoLiveModal) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const videos = devices.filter(d => d.kind === 'videoinput');
+        setVideoDevices(videos);
+      });
+    }
+  }, [showGoLiveModal]);
+
+  // Запрос разрешения на камеру при открытии Go Live
+  useEffect(() => {
+    if (showGoLiveModal) {
+      const constraints: MediaStreamConstraints = { video: currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'user' } };
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+          setCameraAllowed(true);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch(() => {
+          setCameraAllowed(false);
+          setShowGoLiveModal(false);
+        });
+    } else {
+      // Останавливаем камеру при закрытии модалки
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+  }, [showGoLiveModal, currentDeviceId]);
+
+  // Функция для переключения камеры
+  const handleSwitchCamera = () => {
+    if (videoDevices.length > 1) {
+      const currentIdx = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
+      const nextIdx = (currentIdx + 1) % videoDevices.length;
+      setCurrentDeviceId(videoDevices[nextIdx].deviceId);
+    }
+  };
+
+  // Функция для закрытия Go Live
+  const handleCloseGoLive = () => {
+    // Останавливаем камеру
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setShowGoLiveModal(false);
+    // Ставим маркер на карту по текущей позиции
+    if (position) {
+      setGoLiveMarker(position);
+    }
   };
 
   if (showRealMap  ) {
@@ -624,9 +707,29 @@ const MapPage: React.FC = () => {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a>"
           />
-          <Marker position={position as [number, number]}>
-            <Popup>You are here</Popup>
-          </Marker>
+          {position && (
+            <Marker 
+              position={position as [number, number]} 
+              icon={getUserLocationIcon()}
+              eventHandlers={{ click: () => setShowLocationModal(true) }}
+            >
+              <Popup className={styles.popup}   closeButton={false} autoPan={false}  >
+                <div style={{
+                  background: '#181818',
+                  borderRadius: 16,
+                  padding: '10px 18px 8px 18px',
+                  minWidth: 120,
+                  maxWidth: 180,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}>
+                  <div style={{color: '#fff', fontWeight: 700, fontSize: 22, lineHeight: 1, marginBottom: 2}}>2.3K users</div>
+                  <div style={{color: '#aaa', fontSize: 15, fontWeight: 500}}>within 0.2 mi</div>
+                </div>
+              </Popup>
+            </Marker>
+          )}
           {flyTo && <SetViewOnLocation position={flyTo} />}
           {position &&
           <SetViewOnLocation position={position} />
@@ -639,6 +742,22 @@ const MapPage: React.FC = () => {
                 icon={getIncidentIcon(incident.image, incident.color) as L.Icon}
               />
             ))} 
+          {goLiveMarker && (
+            <Marker 
+              position={goLiveMarker} 
+              icon={getIncidentIcon(undefined, 'yellow')}
+              eventHandlers={{ click: () => setActiveIncident({
+                id: 99999,
+                position: goLiveMarker,
+                color: 'yellow',
+                title: 'Go Live завершён',
+                address: 'Ваше местоположение',
+                description: 'Трансляция завершена.',
+                updated: 'только что',
+                views: 0
+              }) }}
+            /> 
+          )}
         </MapContainer>
         <div style={{
           position: 'fixed',
@@ -804,6 +923,180 @@ const MapPage: React.FC = () => {
               </div>
             </div>
           </>
+        )}
+        {/* Модалка местоположения */}
+        {showLocationModal && (
+          <div style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 87,
+            transform: 'translateX(-50%)',
+            width: '100vw',
+            maxWidth: '544px',
+            background: '#181818',
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            boxShadow: '0 -2px 24px rgba(0,0,0,0.25)',
+            zIndex: 2000,
+            color: '#fff',
+          }}>
+            <div style={{padding: '20px 16px'}}>
+              <div style={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16}}>
+                <div>
+                  <div style={{fontSize: 15, color: '#aaa', marginBottom: 4}}>0.4 mi · Midtown</div>
+                  <div style={{fontSize: 24, fontWeight: 700, marginBottom: 8}}>Your Location</div>
+                </div>
+                <button 
+                  onClick={() => setShowLocationModal(false)}
+                  style={{background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer'}}
+                >
+                  &times;
+                </button>
+              </div>
+              
+              <div style={{display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16}}>
+                <div style={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: 16,
+                  background: '#222',
+                  flexShrink: 0,
+                  overflow: 'hidden'
+                }}>
+                  {/* Здесь можно добавить мини-карту или изображение локации */}
+                </div>
+                <div style={{flex: 1}}>
+                  <div style={{fontSize: 16, marginBottom: 8}}>11 alerts past 24 hr</div>
+                  <button style={{
+                    background: '#e53935',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 20,
+                    padding: '8px 16px',
+                    fontSize: 15,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                    onClick={() => {
+                      setShowLocationModal(false);
+                      setShowGoLiveModal(true);
+                    }}
+                  >
+                    <span style={{display: 'flex', alignItems: 'center'}}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                      </svg>
+                    </span>
+                    Go Live
+                  </button>
+                </div>
+              </div>
+
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8}}>
+                <button style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}>
+                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  0
+                </button>
+                <button style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}>
+                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 8v8M8 12h8"/>
+                  </svg>
+                  Follow
+                </button>
+                <button style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6
+                }}>
+                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M4 12h16M14 6l6 6-6 6"/>
+                  </svg>
+                  Share
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Полноэкранная модалка Go Live */}
+        {showGoLiveModal && cameraAllowed !== false && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#000',
+            zIndex: 3000,
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {/* Верхняя панель */}
+            <div style={{padding: '32px 20px 0 20px', color: '#fff'}}>
+              <div style={{fontSize: 32, fontWeight: 700, marginBottom: 8}}>Go Live</div>
+              <div style={{fontSize: 18, color: '#ccc', marginBottom: 0}}>12 Citizen users within 1.5 mi</div>
+              <button onClick={handleCloseGoLive} style={{position: 'absolute', top: 24, right: 20, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M7 10l5 5 5-5"/></svg>
+              </button>
+            </div>
+            {/* Видео */}
+            <video ref={videoRef} autoPlay playsInline muted style={{flex: 1, width: '100%', height: '100%', objectFit: 'cover', background: '#000', display: 'block', position: 'absolute', top: 0, left: 0, zIndex: -1}} />
+            {/* Нижняя панель */}
+            <div style={{position: 'absolute', left: 0, right: 0, bottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48}}>
+              {/* Кнопка переключения камеры, только если камер больше одной */}
+              {videoDevices.length > 1 && (
+                <button onClick={handleSwitchCamera} style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"/><path d="M18 12v-4m0 0l-3 3m3-3l3 3"/><path d="M18 24v4m0 0l-3-3m3 3l3-3"/></svg>
+                </button>
+              )}
+              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 24px'}}>
+                <div style={{display: 'flex', gap: 24, marginBottom: 12}}>
+                  <span style={{color: '#fff', fontWeight: 700, fontSize: 20}}>Incident</span>
+                  <span style={{color: '#fff', opacity: 0.7, fontWeight: 500, fontSize: 20}}>Good Vibes</span>
+                </div>
+                <button style={{width: 90, height: 90, borderRadius: '50%', background: '#000', border: '6px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 4px #222'}}>
+                  <div style={{width: 64, height: 64, borderRadius: '50%', background: '#e53935', border: '4px solid #222'}}></div>
+                </button>
+              </div>
+              <button style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px'}}>
+                <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"/><path d="M18 10v16"/><path d="M10 18h16"/></svg>
+              </button>
+            </div>
+          </div>
         )}
       </div>
     );

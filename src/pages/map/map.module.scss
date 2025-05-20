@@ -1,0 +1,11 @@
+.popup {
+  background-color: aquas;
+
+  :global(.leaflet-popup-content-wrapper) {
+    background: transparent;
+  }
+
+  :global(.leaflet-popup-tip-container) {
+    display: none;
+  }
+}

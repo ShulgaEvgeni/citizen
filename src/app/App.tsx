@@ -72,10 +72,21 @@ const AppContent: React.FC = () => {
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
               onClick={() => setModalOpen(true)}
             >
-              <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="32" cy="32" r="28" fill="#1856f5"/>
-                <path d="M32 18C24.268 18 18 24.268 18 32V40C18 47.732 24.268 54 32 54C39.732 54 46 47.732 46 40V32C46 24.268 39.732 18 32 18Z" fill="white"/>
-                <circle cx="32" cy="32" r="5" fill="#1856f5"/>
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="24" fill="#1856f5"/>
+                <g filter="url(#glow)">
+                  <path d="M24 12C18 12 14 15.5 14 21.5C14 32 24 36 24 36C24 36 34 32 34 21.5C34 15.5 30 12 24 12Z" fill="white"/>
+                  <circle cx="24" cy="24" r="5" fill="#1856f5"/>
+                </g>
+                <defs>
+                  <filter id="glow" x="0" y="0" width="48" height="48" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                    <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
               </svg>
             </button>
           </div>
