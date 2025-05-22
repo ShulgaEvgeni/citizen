@@ -503,7 +503,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [comments, setComments] = useState(COMMENTS);
   const [goLiveMarker, setGoLiveMarker] = useState<[number, number] | null>(null);
   const navigate = useNavigate();
-
+  console.log('showGoLiveModal', showGoLiveModal);
   // Проверяем разрешение на геолокацию при монтировании
   useEffect(() => {
     if (!navigator.permissions || !navigator.geolocation) return;
@@ -583,6 +583,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         })
         .catch(() => {
           setCameraAllowed(false);
+          console.log('de', 1);
           setShowGoLiveModal(false);
         });
     } else {
@@ -599,9 +600,34 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const handleSwitchCamera = () => {
     if (videoDevices.length > 1) {
       let currentIdx = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
-      if (currentIdx === -1) currentIdx = 0;
-      const nextIdx = (currentIdx + 1) % videoDevices.length;
-      setCurrentDeviceId(videoDevices[nextIdx].deviceId);
+      // Если текущая камера не найдена или это последняя камера, переходим к первой
+      const nextIdx = currentIdx === -1 || currentIdx === videoDevices.length - 1 ? 0 : currentIdx + 1;
+      const nextDeviceId = videoDevices[nextIdx].deviceId;
+      
+      // Останавливаем текущий поток
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
+
+      // Запускаем новый поток с новой камерой
+      const constraints: MediaStreamConstraints = { 
+        video: { deviceId: { exact: nextDeviceId } }
+      };
+
+      navigator.mediaDevices?.getUserMedia(constraints)
+        .then(stream => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+          setCurrentDeviceId(nextDeviceId);
+        })
+        .catch(error => {
+          console.error('Ошибка при переключении камеры:', error);
+          // В случае ошибки возвращаемся к предыдущей камере
+          setCurrentDeviceId(currentDeviceId);
+        });
     }
   };
 
@@ -612,7 +638,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
-    }
+    } 
     setShowGoLiveModal(false);
     setCurrentDeviceId(null);
     // Ставим маркер на карту по текущей позиции
