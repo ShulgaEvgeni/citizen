@@ -485,7 +485,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [activeIncident, setActiveIncident] = useState<typeof INCIDENTS[0] | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showGoLiveModal, setShowGoLiveModal] = useState(true);
+  const [showGoLiveModal, setShowGoLiveModal] = useState(false);
   const [cameraAllowed, setCameraAllowed] = useState<boolean | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
