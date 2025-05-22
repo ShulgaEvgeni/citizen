@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 // import HomePage from '../pages/home/HomePage';
 import AboutPage from '../pages/about/AboutPage';
 import styles from './App.module.scss';
@@ -29,9 +29,9 @@ const SplashScreen: React.FC = () => (
 
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showRealMap, setShowRealMap] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<MapPage />} />
+        <Route path="/" element={<MapPage onShowRealMapChange={setShowRealMap} />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
@@ -58,7 +58,8 @@ const AppContent: React.FC = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<EditProfilePage />} />
       </Routes>
-      { (location.pathname === '/' || location.pathname.startsWith('/notifications')) && (
+      
+      {showRealMap && (
         <div className={styles.bottomNav}>
           <Link to="/" className={styles.bottomNavIcon} aria-label="Главная">
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -479,13 +479,13 @@ function getUserLocationIcon() {
   });
 }
 
-const MapPage: React.FC = () => {
+const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ onShowRealMapChange }) => {
   const [showRealMap, setShowRealMap] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [activeIncident, setActiveIncident] = useState<typeof INCIDENTS[0] | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showGoLiveModal, setShowGoLiveModal] = useState(false);
+  const [showGoLiveModal, setShowGoLiveModal] = useState(true);
   const [cameraAllowed, setCameraAllowed] = useState<boolean | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
@@ -513,6 +513,7 @@ const MapPage: React.FC = () => {
           (pos) => {
             setPosition([pos.coords.latitude, pos.coords.longitude]);
             setShowRealMap(true);
+            onShowRealMapChange?.(true);
           },
           (e) => {
             console.log(e);
@@ -520,7 +521,7 @@ const MapPage: React.FC = () => {
         );
       }
     });
-  }, []);
+  }, [onShowRealMapChange]);
 
   useEffect(() => {
     if (search.trim() === '') {
@@ -547,13 +548,15 @@ const MapPage: React.FC = () => {
         setError('Location permission denied.')}
     );
     setShowRealMap(true);
+    onShowRealMapChange?.(true);
   };
 
   // Получаем список камер
   useEffect(() => {
     if (showGoLiveModal) {
-      navigator.mediaDevices.enumerateDevices().then(devices => {
+      navigator.mediaDevices?.enumerateDevices().then(devices => {
         const videos = devices.filter(d => d.kind === 'videoinput');
+        console.log('videos', videos);
         setVideoDevices(videos);
         // Если есть камеры и currentDeviceId не выставлен, выставляем первую
         if (videos.length > 0 && !currentDeviceId) {
@@ -570,8 +573,9 @@ const MapPage: React.FC = () => {
   useEffect(() => {
     if (showGoLiveModal) {
       const constraints: MediaStreamConstraints = { video: currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'user' } };
-      navigator.mediaDevices.getUserMedia(constraints)
+      navigator.mediaDevices?.getUserMedia(constraints)
         .then(stream => {
+          console.log('stream', stream);
           setCameraAllowed(true);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
@@ -582,7 +586,7 @@ const MapPage: React.FC = () => {
           setShowGoLiveModal(false);
         });
     } else {
-      // Останавливаем камеру при закрытии модалки
+      // Останавливаем все камеры при закрытии модалки
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach(track => track.stop());
@@ -603,13 +607,14 @@ const MapPage: React.FC = () => {
 
   // Функция для закрытия Go Live
   const handleCloseGoLive = () => {
-    // Останавливаем камеру
+    // Останавливаем все камеры
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
     setShowGoLiveModal(false);
+    setCurrentDeviceId(null);
     // Ставим маркер на карту по текущей позиции
     if (position) {
       setGoLiveMarker(position);
