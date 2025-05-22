@@ -572,7 +572,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   // Запрос разрешения на камеру при открытии Go Live
   useEffect(() => {
-    if (showGoLiveModal) {
+    if (showGoLiveModal && currentDeviceId) {
       const constraints: MediaStreamConstraints = { video: currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'user' } };
      console.log('constraints', constraints);
       navigator.mediaDevices?.getUserMedia(constraints)
