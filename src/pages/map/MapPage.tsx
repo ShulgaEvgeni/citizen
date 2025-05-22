@@ -504,7 +504,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [comments, setComments] = useState(COMMENTS);
   const [goLiveMarker, setGoLiveMarker] = useState<[number, number] | null>(null);
   const navigate = useNavigate();
-  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [isFrontCamera, setIsFrontCamera] = useState(false);
   console.log('showGoLiveModal', showGoLiveModal);
   // Проверяем разрешение на геолокацию при монтировании
   useEffect(() => {
@@ -662,7 +662,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   if (showRealMap  ) {
     return (
-      <div style={{height: '100vh', width: '100vw', position: 'relative', paddingBottom: 90}}>
+      <div style={{height: '100dvh', width: '100vw', position: 'relative', paddingBottom: 90}}>
         {/* Модалка поиска */}
         {searchOpen && (
           <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.98)', zIndex: 2001, display: 'flex', flexDirection: 'column'}}>
@@ -754,7 +754,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             </svg>
           </button>
         </div>
-        <MapContainer center={(flyTo || position) as [number, number]} zoom={16} style={{height: '100vh', width: '100vw', paddingBottom: 90}}>
+        <MapContainer center={(flyTo || position) as [number, number]} zoom={16} style={{height: '100dvh', width: '100vw', paddingBottom: 90}}>
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a>"
@@ -1113,7 +1113,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             background: '#000',
             zIndex: 3000,
             width: '100vw',
-            height: '100vh',
+            height: '100dvh',
             display: 'flex',
             flexDirection: 'column',
           }}>
@@ -1156,7 +1156,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   // Экран с кнопкой только если разрешение не получено
   return (
-    <div style={{height: '100vh', width: '100vw', background: '#000', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'}}>
+    <div style={{height: '100dvh', width: '100vw', background: '#000', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'}}>
       <div style={{marginBottom: 32, textAlign: 'center'}}>
         <div style={{fontSize: 32, fontWeight: 700, marginBottom: 12}}>Premium Setup Complete</div>
         <div style={{fontSize: 18, opacity: 0.7, marginBottom: 24}}>Your Premium membership includes:</div>

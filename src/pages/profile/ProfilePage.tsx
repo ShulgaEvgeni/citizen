@@ -7,7 +7,7 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111', color: '#fff', fontFamily: 'inherit', paddingBottom: 100 }}>
+    <div style={{ minHeight: '100dvh', background: '#111', color: '#fff', fontFamily: 'inherit', paddingBottom: 100 }}>
       {/* Верхняя панель */}
       <div style={{ display: 'flex', alignItems: 'center', height: 56, borderBottom: '1px solid #222', padding: '0 12px', position: 'sticky', top: 0, background: '#111', zIndex: 10 }}>
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 20, marginRight: 8, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>

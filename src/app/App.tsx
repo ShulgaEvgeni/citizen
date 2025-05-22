@@ -110,7 +110,7 @@ const AppContent: React.FC = () => {
               left: 0,
               top: 0,
               width: '100vw',
-              height: '100vh', 
+              height: '100dvh', 
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',

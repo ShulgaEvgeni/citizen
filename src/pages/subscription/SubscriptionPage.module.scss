@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,7 +42,7 @@
 .modal {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column; 
   z-index: 2;
@@ -51,7 +51,7 @@
 .modalTop {
   position: relative;
   width: 100vw;
-  height: 44vh;
+  height: 44dvh;
   min-height: 260px;
   background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80') center center / cover no-repeat;
   display: flex;
