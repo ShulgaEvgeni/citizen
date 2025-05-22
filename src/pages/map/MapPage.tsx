@@ -504,6 +504,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [comments, setComments] = useState(COMMENTS);
   const [goLiveMarker, setGoLiveMarker] = useState<[number, number] | null>(null);
   const navigate = useNavigate();
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
   console.log('showGoLiveModal', showGoLiveModal);
   // Проверяем разрешение на геолокацию при монтировании
   useEffect(() => {
@@ -611,45 +612,31 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   // Функция для переключения камеры
   const handleSwitchCamera = () => {
-    // Фильтруем только фронтальную и заднюю камеры
+    setIsFrontCamera(!isFrontCamera);
     
-
-    const mainCameras = videoDevices.filter(device => {
-      const label = device.label.toLowerCase();
-      return label.includes('front') || label.includes('back') || 
-             label.includes('фронтальная') || label.includes('задняя');
-    });
-
-    if (mainCameras.length > 1) {
-      const currentIdx = mainCameras.findIndex(d => d.deviceId === currentDeviceId);
-      // Если текущая камера не найдена или это последняя камера, переходим к первой
-      const nextIdx = currentIdx === -1 || currentIdx === mainCameras.length - 1 ? 0 : currentIdx + 1;
-      const nextDeviceId = mainCameras[nextIdx].deviceId;
-      
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        setVideoStream(null);
-      }
-
-      // Запускаем новый поток с новой камерой
-      const constraints: MediaStreamConstraints = { 
-        video: { deviceId: { exact: nextDeviceId } }
-      };
-
-      navigator.mediaDevices?.getUserMedia(constraints)
-        .then(stream => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            console.log('Новая камера активирована:', mainCameras[nextIdx].label);
-          }
-          setCurrentDeviceId(nextDeviceId);
-        })
-        .catch(error => {
-          console.error('Ошибка при переключении камеры:', error);
-          // В случае ошибки возвращаемся к предыдущей камере
-          setCurrentDeviceId(currentDeviceId);
-        });
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+      setVideoStream(null);
     }
+
+    // Запускаем новый поток с новой камерой
+    const constraints: MediaStreamConstraints = { 
+      video: { facingMode: { exact: !isFrontCamera ? "environment" : "user" } }
+    };
+
+    navigator.mediaDevices?.getUserMedia(constraints)
+      .then(stream => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          console.log('Камера переключена:', isFrontCamera ? 'на заднюю' : 'на фронтальную');
+        }
+        setVideoStream(stream);
+      })
+      .catch(error => {
+        console.error('Ошибка при переключении камеры:', error);
+        // В случае ошибки возвращаемся к предыдущей камере
+        setIsFrontCamera(!isFrontCamera);
+      });
   };
 
   // Функция для закрытия Go Live
