@@ -555,6 +555,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   useEffect(() => {
     if (showGoLiveModal) {
       navigator.mediaDevices?.enumerateDevices().then(devices => {
+        console.log('devices', devices);
         const videos = devices.filter(d => d.kind === 'videoinput');
         console.log('videos', videos);
         setVideoDevices(videos);
