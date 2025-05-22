@@ -1128,12 +1128,14 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             {/* Видео */}
             <video ref={videoRef} autoPlay playsInline muted style={{flex: 1, width: '100%', height: '100%', objectFit: 'cover', background: '#000', display: 'block', position: 'absolute', top: 0, left: 0, zIndex: -1}} />
             {/* Нижняя панель */}
-            <div style={{position: 'absolute', left: 0, right: 0, bottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48}}>
+            <div style={{position: 'absolute', left: 0, right: 0, bottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly'}}>
               {/* Кнопка переключения камеры, только если камер больше одной */}
               {videoDevices.length > 1 && (
                 <button onClick={handleSwitchCamera} style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"/><path d="M18 12v-4m0 0l-3 3m3-3l3 3"/><path d="M18 24v4m0 0l-3-3m3 3l3-3"/></svg>
-                </button>
+                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M28 18a10 10 0 1 1-4.1-7.98" stroke="#FFF" strokeWidth="3" fill="none" strokeLinecap="round"/>
+  <path d="M24 6v6h6" stroke="#FFF" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+</svg></button>
               )}
               <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 24px'}}>
                 <div style={{display: 'flex', gap: 24, marginBottom: 12}}>
