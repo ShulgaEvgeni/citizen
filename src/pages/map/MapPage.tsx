@@ -600,18 +600,33 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   // Функция для переключения камеры
   const handleSwitchCamera = () => {
-    if (videoDevices.length > 1) {
-      let currentIdx = videoDevices.findIndex(d => d.deviceId === currentDeviceId);
+    // Фильтруем только фронтальную и заднюю камеры
+    const mainCameras = videoDevices.filter(device => {
+      const label = device.label.toLowerCase();
+      return label.includes('front') || label.includes('back') || 
+             label.includes('фронтальная') || label.includes('задняя');
+    });
+
+    if (mainCameras.length > 1) {
+      const currentIdx = mainCameras.findIndex(d => d.deviceId === currentDeviceId);
       // Если текущая камера не найдена или это последняя камера, переходим к первой
-      const nextIdx = currentIdx === -1 || currentIdx === videoDevices.length - 1 ? 0 : currentIdx + 1;
-      const nextDeviceId = videoDevices[nextIdx].deviceId;
+      const nextIdx = currentIdx === -1 || currentIdx === mainCameras.length - 1 ? 0 : currentIdx + 1;
+      const nextDeviceId = mainCameras[nextIdx].deviceId;
       
+      // Проверяем и останавливаем текущий поток
+      const stopCurrentStream = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+          const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+          tracks.forEach(track => {
+            track.stop();
+            console.log('Камера остановлена:', track.label);
+          });
+          videoRef.current.srcObject = null;
+        }
+      };
+
       // Останавливаем текущий поток
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
+      stopCurrentStream();
 
       // Запускаем новый поток с новой камерой
       const constraints: MediaStreamConstraints = { 
@@ -622,6 +637,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         .then(stream => {
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+            console.log('Новая камера активирована:', mainCameras[nextIdx].label);
           }
           setCurrentDeviceId(nextDeviceId);
         })
