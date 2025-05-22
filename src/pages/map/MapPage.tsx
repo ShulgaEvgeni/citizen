@@ -555,7 +555,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   useEffect(() => {
     if (showGoLiveModal) {
       // Сначала запрашиваем разрешение на камеру
-      navigator.mediaDevices?.getUserMedia({ video: true })
+      navigator.mediaDevices?.getUserMedia({ video: currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'environment' } })
         .then(stream => {
           // Останавливаем тестовый поток
           stream.getTracks().forEach(track => track.stop());
