@@ -551,30 +551,46 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
     onShowRealMapChange?.(true);
   };
 
-  // Получаем список камер
+  // Запрос разрешения на камеру при открытии Go Live
   useEffect(() => {
     if (showGoLiveModal) {
-      navigator.mediaDevices?.enumerateDevices().then(devices => {
-        console.log('devices', devices);
-        const videos = devices.filter(d => d.kind === 'videoinput');
-        console.log('videos', videos);
-        setVideoDevices(videos);
-        // Если есть камеры и currentDeviceId не выставлен, выставляем первую
-        if (videos.length > 0 && !currentDeviceId) {
-          setCurrentDeviceId(videos[0].deviceId);
-        }
-      });
+      // Сначала запрашиваем разрешение на камеру
+      navigator.mediaDevices?.getUserMedia({ video: true })
+        .then(stream => {
+          // Останавливаем тестовый поток
+          stream.getTracks().forEach(track => track.stop());
+          
+          // Теперь получаем список устройств
+          return navigator.mediaDevices?.enumerateDevices();
+        })
+        .then(devices => {
+          const videos = devices?.filter(d => d.kind === 'videoinput') || [];
+          console.log('videos', videos);
+          setVideoDevices(videos);
+          // Если есть камеры и currentDeviceId не выставлен, выставляем первую
+          if (videos.length > 0 && !currentDeviceId) {
+            setCurrentDeviceId(videos[0].deviceId);
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка при запросе разрешений на камеру:', error);
+          setCameraAllowed(false);
+          setShowGoLiveModal(false);
+        });
     } else {
       // Сброс currentDeviceId при закрытии модалки
       setCurrentDeviceId(null);
     }
   }, [showGoLiveModal]);
 
-  // Запрос разрешения на камеру при открытии Go Live
+  // Эффект для активации камеры после получения разрешений
   useEffect(() => {
     if (showGoLiveModal && currentDeviceId) {
-      const constraints: MediaStreamConstraints = { video: currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'user' } };
-     console.log('constraints', constraints);
+      const constraints: MediaStreamConstraints = { 
+        video: { deviceId: { exact: currentDeviceId } }
+      };
+      console.log('constraints', constraints);
+      
       navigator.mediaDevices?.getUserMedia(constraints)
         .then(stream => {
           console.log('stream', stream);
@@ -583,18 +599,11 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             videoRef.current.srcObject = stream;
           }
         })
-        .catch(() => {
+        .catch(error => {
+          console.error('Ошибка при активации камеры:', error);
           setCameraAllowed(false);
-          console.log('de', 1);
           setShowGoLiveModal(false);
         });
-    } else {
-      // Останавливаем все камеры при закрытии модалки
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
     }
   }, [showGoLiveModal, currentDeviceId]);
 
