@@ -489,6 +489,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [cameraAllowed, setCameraAllowed] = useState<boolean | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
   // Состояния для hover-эффекта
   const [hoverLeft, setHoverLeft] = useState(false);
@@ -559,7 +560,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         .then(stream => {
           // Останавливаем тестовый поток
           stream.getTracks().forEach(track => track.stop());
-          
+          setVideoStream(stream);
           // Теперь получаем список устройств
           return navigator.mediaDevices?.enumerateDevices();
         })
@@ -595,6 +596,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         .then(stream => {
           console.log('stream', stream);
           setCameraAllowed(true);
+          setVideoStream(stream);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
           }
@@ -610,6 +612,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   // Функция для переключения камеры
   const handleSwitchCamera = () => {
     // Фильтруем только фронтальную и заднюю камеры
+    
+
     const mainCameras = videoDevices.filter(device => {
       const label = device.label.toLowerCase();
       return label.includes('front') || label.includes('back') || 
@@ -622,20 +626,10 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
       const nextIdx = currentIdx === -1 || currentIdx === mainCameras.length - 1 ? 0 : currentIdx + 1;
       const nextDeviceId = mainCameras[nextIdx].deviceId;
       
-      // Проверяем и останавливаем текущий поток
-      const stopCurrentStream = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-          const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-          tracks.forEach(track => {
-            track.stop();
-            console.log('Камера остановлена:', track.label);
-          });
-          videoRef.current.srcObject = null;
-        }
-      };
-
-      // Останавливаем текущий поток
-      stopCurrentStream();
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        setVideoStream(null);
+      }
 
       // Запускаем новый поток с новой камерой
       const constraints: MediaStreamConstraints = { 
@@ -673,6 +667,11 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
       setGoLiveMarker(position);
     }
   };
+
+
+  useEffect(() => {
+    console.log('videoStream', videoStream);
+  }, [videoStream]);
 
   if (showRealMap  ) {
     return (
