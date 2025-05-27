@@ -15,7 +15,7 @@ const WelcomeCodeScreen: React.FC<{ onSubmit: (code: string) => void }> = ({ onS
   return (
     <div className={styles.root}>
       <div className={styles.content}>
-        <div className={styles.title}>Enter code</div>
+        <div className={styles.title}>Введите код</div>
         <Input
           type="text"
           placeholder="1234"
@@ -26,7 +26,7 @@ const WelcomeCodeScreen: React.FC<{ onSubmit: (code: string) => void }> = ({ onS
           fullWidth
         />
         <div className={styles.hint}>
-          Didn't receive your code? <Button className={styles.resend} type="button">Resend</Button>
+          Не получили код? <Button className={styles.resend} type="button">Отправить повторно</Button>
         </div>
       </div>
     </div>

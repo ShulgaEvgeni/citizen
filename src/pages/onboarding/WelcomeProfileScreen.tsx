@@ -3,7 +3,7 @@ import styles from './WelcomeProfileScreen.module.scss';
 import Button from '../../shared/ui/Button/Button';
 import Input from '../../shared/ui/Input/Input';
 
-const generateUsername = () => `NewYorkUser${Math.floor(Math.random() * 1e8)}`;
+const generateUsername = () => `Пользователь${Math.floor(Math.random() * 1e8)}`;
 
 const WelcomeProfileScreen: React.FC<{ onContinue: (username: string, email: string) => void }> = ({ onContinue }) => {
   const [username, setUsername] = useState(generateUsername());
@@ -11,12 +11,12 @@ const WelcomeProfileScreen: React.FC<{ onContinue: (username: string, email: str
   return (
     <div className={styles.root}>
       <div className={styles.content}>
-        <div className={styles.title}>Create your profile</div>
-        <div className={styles.subtitle}>Enter username and email address</div>
+        <div className={styles.title}>Создайте профиль</div>
+        <div className={styles.subtitle}>Введите имя пользователя и email</div>
      
         <Input
           type="text"
-          placeholder="Enter username"
+          placeholder="Введите имя пользователя"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           onClear={() => setUsername('')}
@@ -26,7 +26,7 @@ const WelcomeProfileScreen: React.FC<{ onContinue: (username: string, email: str
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          placeholder="Email address"
+          placeholder="Email адрес"
           fullWidth
         />
         <Button
@@ -34,7 +34,7 @@ const WelcomeProfileScreen: React.FC<{ onContinue: (username: string, email: str
           disabled={!username.trim() || !email.trim()}
           onClick={() => onContinue(username, email)}
         >
-          Continue
+          Продолжить
         </Button>
       </div>
     </div>

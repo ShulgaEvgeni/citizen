@@ -69,7 +69,7 @@ const AppContent: React.FC = () => {
           <div className={styles.bottomNavCenter}>
             <button
               className={styles.bottomNavCircle}
-              aria-label="Открыть модалку"
+              aria-label="Открыть модальное окно"
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
               onClick={() => setModalOpen(true)}
             >
@@ -143,7 +143,6 @@ const AppContent: React.FC = () => {
                   marginBottom: 8,
                   boxShadow: '0 0 24px 8px #1856f5'
                 }}>
-                  {/* Заглушка-аватар */}
                   <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="50" cy="50" r="50" fill="#23242a" />
                     <ellipse cx="50" cy="45" rx="22" ry="18" fill="#444" />
@@ -151,13 +150,13 @@ const AppContent: React.FC = () => {
                     <ellipse cx="50" cy="45" rx="12" ry="10" fill="#888" />
                   </svg>
                 </div>
-                <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Live Agents on duty</div>
+                <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>Агенты на дежурстве</div>
               </div>
               <div style={{ fontWeight: 700, fontSize: 22, textAlign: 'center', marginBottom: 8 }}>
-                Get instant help from powerful safety agents
+                Получите мгновенную помощь от опытных агентов безопасности
               </div>
               <div style={{ color: '#aaa', textAlign: 'center', marginBottom: 16 }}>
-                Demo Agent powers &rsaquo;
+                Демо-возможности агента &rsaquo;
               </div>
               <div style={{ display: 'flex', gap: 16, marginBottom: 24, justifyContent: 'center' }}>
                 <button style={{
@@ -175,7 +174,7 @@ const AppContent: React.FC = () => {
                   boxShadow: '0 2px 8px rgba(24,86,245,0.15)'
                 }}>
                   <span style={{ fontSize: 28, marginBottom: 8 }}>🟦</span>
-                  Live Monitoring
+                  Мониторинг
                 </button>
                 <button style={{
                   background: 'linear-gradient(135deg, #0a1a3a 60%, #1856f5 100%)',
@@ -192,13 +191,13 @@ const AppContent: React.FC = () => {
                   boxShadow: '0 2px 8px rgba(24,86,245,0.15)'
                 }}>
                   <span style={{ fontSize: 28, marginBottom: 8 }}>🎥</span>
-                  Video Call
+                  Видеозвонок
                 </button>
               </div>
               <input
                 type="text"
                 disabled
-                value="Start Agent Chat"
+                value="Начать чат с агентом"
                 style={{
                   width: '100%',
                   borderRadius: 16,

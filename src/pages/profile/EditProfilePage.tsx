@@ -53,16 +53,16 @@ const EditProfilePage: React.FC = () => {
     <div style={{ minHeight: '100dvh', background: '#111', color: '#fff', fontFamily: 'inherit', paddingBottom: 100 }}>
       {/* Верхняя панель */}
       <div style={{ display: 'flex', alignItems: 'center', height: 56, borderBottom: '1px solid #222', padding: '0 12px', position: 'sticky', top: 0, background: '#111', zIndex: 10 }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 18, fontWeight: 600, marginRight: 8, cursor: 'pointer' }}>CANCEL</button>
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 18, fontWeight: 600, marginRight: 8, cursor: 'pointer' }}>ОТМЕНА</button>
         <div style={{ flex: 1 }} />
-        <button onClick={handleSave} style={{ background: 'none', border: 'none', color: '#7faaff', fontSize: 18, fontWeight: 600, cursor: 'pointer' }}>SAVE</button>
+        <button onClick={handleSave} style={{ background: 'none', border: 'none', color: '#7faaff', fontSize: 18, fontWeight: 600, cursor: 'pointer' }}>СОХРАНИТЬ</button>
       </div>
       {/* Аватар */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 28, marginBottom: 18 }}>
         <div style={{ width: 110, height: 110, borderRadius: '50%', background: '#3a5647', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, position: 'relative', cursor: 'pointer' }}
           onClick={() => fileInputRef.current?.click()}>
           {avatarPreview ? (
-            <img src={avatarPreview} alt="avatar" style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover' }} />
+            <img src={avatarPreview} alt="аватар" style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover' }} />
           ) : (
             <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
               <circle cx="40" cy="32" r="20" fill="#7fa88c" />
@@ -81,18 +81,18 @@ const EditProfilePage: React.FC = () => {
       </div>
       {/* Форма */}
       <div style={{ maxWidth: 420, margin: '0 auto', padding: '0 18px' }}>
-        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>FIRST NAME (FRIENDS ONLY)</div>
-        <input value={profile.firstName} onChange={e => handleChange('firstName', e.target.value)} placeholder="First name" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
-        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>LAST NAME (FRIENDS ONLY)</div>
-        <input value={profile.lastName} onChange={e => handleChange('lastName', e.target.value)} placeholder="Last name" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
-        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>USERNAME</div>
-        <input value={profile.username} onChange={e => handleChange('username', e.target.value)} placeholder="Username" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
-        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>LOCATION</div>
-        <input value={profile.location} onChange={e => handleChange('location', e.target.value)} placeholder="enter your city" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
+        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>ИМЯ (ТОЛЬКО ДЛЯ ДРУЗЕЙ)</div>
+        <input value={profile.firstName} onChange={e => handleChange('firstName', e.target.value)} placeholder="Имя" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
+        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>ФАМИЛИЯ (ТОЛЬКО ДЛЯ ДРУЗЕЙ)</div>
+        <input value={profile.lastName} onChange={e => handleChange('lastName', e.target.value)} placeholder="Фамилия" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
+        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>ИМЯ ПОЛЬЗОВАТЕЛЯ</div>
+        <input value={profile.username} onChange={e => handleChange('username', e.target.value)} placeholder="Имя пользователя" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
+        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>МЕСТОПОЛОЖЕНИЕ</div>
+        <input value={profile.location} onChange={e => handleChange('location', e.target.value)} placeholder="введите ваш город" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
         <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>EMAIL</div>
         <input value={profile.email} onChange={e => handleChange('email', e.target.value)} placeholder="Email" style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
-        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>YOUR MISSION</div>
-        <input value={profile.mission} onChange={e => handleChange('mission', e.target.value)} placeholder="enter your mission..." style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
+        <div style={{ color: '#888', fontSize: 13, fontWeight: 600, marginBottom: 2, marginTop: 18 }}>ВАША МИССИЯ</div>
+        <input value={profile.mission} onChange={e => handleChange('mission', e.target.value)} placeholder="введите вашу миссию..." style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid #222', color: '#fff', fontSize: 20, padding: '10px 0', marginBottom: 8 }} />
       </div>
     </div>
   );

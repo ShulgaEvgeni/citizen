@@ -17,7 +17,9 @@ const NotificationsSettingsPage: React.FC = () => {
         setHelicopter(!!parsed.helicopter);
         setCovid(!!parsed.covid);
         setWeather(!!parsed.weather);
-      } catch {}
+      } catch (error) {
+        console.error('Ошибка при загрузке настроек:', error);
+      }
     }
   }, []);
 
@@ -34,17 +36,17 @@ const NotificationsSettingsPage: React.FC = () => {
             <path d="M15 18L9 12L15 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <div className={styles.title}>Notification Settings</div>
+        <div className={styles.title}>Настройки уведомлений</div>
       </div>
       <div className={styles.desc}>
-        Customize your notifications based on your personal preferences. Opt-out to receive only major notifications in each category.
+        Настройте уведомления в соответствии с вашими предпочтениями. Отключите ненужные категории, чтобы получать только важные уведомления.
       </div>
-      <div className={styles.categoriesTitle}>Categories</div>
+      <div className={styles.categoriesTitle}>Категории</div>
       <div className={styles.list}>
         <div className={styles.item}>
           <div>
-            <div className={styles.itemTitle}>Helicopter Notifications</div>
-            <div className={styles.itemDesc}>Information about helicopters overhead and related incidents</div>
+            <div className={styles.itemTitle}>Уведомления о вертолетах</div>
+            <div className={styles.itemDesc}>Информация о вертолетах в воздухе и связанных инцидентах</div>
           </div>
           <label className={styles.switch}>
             <input type="checkbox" checked={helicopter} onChange={() => setHelicopter(v => !v)} />
@@ -53,8 +55,8 @@ const NotificationsSettingsPage: React.FC = () => {
         </div>
         <div className={styles.item}>
           <div>
-            <div className={styles.itemTitle}>COVID-19 Notifications</div>
-            <div className={styles.itemDesc}>Updates on public health, like virus outbreaks or vaccination (e.g. COVID)</div>
+            <div className={styles.itemTitle}>Уведомления о COVID-19</div>
+            <div className={styles.itemDesc}>Обновления о состоянии общественного здоровья, вспышках заболеваний и вакцинации</div>
           </div>
           <label className={styles.switch}>
             <input type="checkbox" checked={covid} onChange={() => setCovid(v => !v)} />
@@ -63,8 +65,8 @@ const NotificationsSettingsPage: React.FC = () => {
         </div>
         <div className={styles.item}>
           <div>
-            <div className={styles.itemTitle}>Weather Notifications</div>
-            <div className={styles.itemDesc}>Alerts about weather conditions and natural disasters, like earthquakes or tornadoes</div>
+            <div className={styles.itemTitle}>Уведомления о погоде</div>
+            <div className={styles.itemDesc}>Предупреждения о погодных условиях и стихийных бедствиях, таких как землетрясения или торнадо</div>
           </div>
           <label className={styles.switch}>
             <input type="checkbox" checked={weather} onChange={() => setWeather(v => !v)} />

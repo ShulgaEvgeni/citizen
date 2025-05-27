@@ -7,16 +7,16 @@ const STORAGE_KEY = 'notificationSettings';
 const DEMO_NOTIFICATIONS = [
   {
     id: 1,
-    time: '1:28pm',
-    title: 'Two Trapped in Overturned Vehicle',
-    desc: 'Firefighters are working to free the two victims from the wreckage in Columbus Circle. Tap for updates.',
+    time: '13:28',
+    title: 'Два человека застряли в перевернувшемся автомобиле',
+    desc: 'Пожарные работают над освобождением двух пострадавших из обломков на площади Колумба. Нажмите для обновлений.',
     dot: 'blue',
   },
   {
     id: 2,
-    time: '3:49am',
-    title: 'Go Live. 400 Feet away',
-    desc: 'Vehicle Collision. Tap to update your community',
+    time: '03:49',
+    title: 'Прямая трансляция. 400 метров',
+    desc: 'Дорожно-транспортное происшествие. Нажмите, чтобы обновить информацию для вашего сообщества',
     dot: 'red',
   },
 ];
@@ -46,7 +46,7 @@ const NotificationsPage: React.FC = () => {
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <div className={styles.title}>Notifications</div>
+        <div className={styles.title}>Уведомления</div>
         <button
           className={styles.settingsBtn}
           aria-label="Настройки уведомлений"
@@ -62,7 +62,7 @@ const NotificationsPage: React.FC = () => {
       </div>
       {enabled ? (
         <>
-          <div className={styles.recent}>Recent</div>
+          <div className={styles.recent}>Недавние</div>
           <div className={styles.notificationsList}>
             {DEMO_NOTIFICATIONS.map(n => (
               <div className={styles.notification} key={n.id}>
@@ -73,8 +73,8 @@ const NotificationsPage: React.FC = () => {
                 <div className={styles.notificationDesc}>{n.desc}</div>
                 <div className={styles.notificationMeta}>
                   <span className={styles.notificationTime}>{n.time}</span>
-                  <span className={styles.metaBtn}>helpful <span role="img" aria-label="like">👍</span></span>
-                  <span className={styles.metaBtn}>not helpful <span role="img" aria-label="dislike">👎</span></span>
+                  <span className={styles.metaBtn}>полезно <span role="img" aria-label="like">👍</span></span>
+                  <span className={styles.metaBtn}>не полезно <span role="img" aria-label="dislike">👎</span></span>
                 </div>
               </div>
             ))}
@@ -100,10 +100,10 @@ const NotificationsPage: React.FC = () => {
               <circle cx="160" cy="110" r="7" fill="#1856f5" />
             </svg>
           </div>
-          <div className={styles.noNotifTitle}>NO NOTIFICATIONS AT THIS MOMENT</div>
+          <div className={styles.noNotifTitle}>В ДАННЫЙ МОМЕНТ НЕТ УВЕДОМЛЕНИЙ</div>
           <div className={styles.noNotifDesc}>
-            We will notify you when an incident happens near you or your inner circle.<br />
-            We'll also send you news and community updates.
+            Мы уведомим вас, когда произойдет инцидент рядом с вами или вашими близкими.<br />
+            Мы также будем отправлять вам новости и обновления сообщества.
           </div>
         </>
       )}

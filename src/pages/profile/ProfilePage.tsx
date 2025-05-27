@@ -13,8 +13,8 @@ const ProfilePage: React.FC = () => {
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 20, marginRight: 8, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 18, letterSpacing: 0.2 }}>JohnMobbinNYC</div>
-        <button style={{ background: 'none', border: 'none', color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/profile/edit')}>EDIT</button>
+        <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 18, letterSpacing: 0.2 }}>ИванМосква</div>
+        <button style={{ background: 'none', border: 'none', color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/profile/edit')}>РЕДАКТИРОВАТЬ</button>
       </div>
       {/* Аватар и имя */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 28, marginBottom: 12 }}>
@@ -24,24 +24,24 @@ const ProfilePage: React.FC = () => {
             <path d="M40 52c-13 0-24 6-24 14v2h48v-2c0-8-11-14-24-14z" fill="#7fa88c" />
           </svg>
         </div>
-        <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 8 }}>John Mobbin</div>
+        <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 8 }}>Иван Иванов</div>
       </div>
       {/* Статистика */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 18px auto', maxWidth: 340, background: '#181818', borderRadius: 18, overflow: 'hidden' }}>
         <div style={{ flex: 1, textAlign: 'center', padding: '18px 0 12px 0' }}>
           <div style={{ fontSize: 22, fontWeight: 700 }}>1</div>
-          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>PLACES</div>
+          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>МЕСТА</div>
         </div>
         <div style={{ width: 1, height: 36, background: '#222' }} />
         <div style={{ flex: 1, textAlign: 'center', padding: '18px 0 12px 0' }}>
           <div style={{ fontSize: 22, fontWeight: 700 }}>0</div>
-          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>FRIENDS</div>
+          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>ДРУЗЬЯ</div>
         </div>
       </div>
       {/* Переключатели */}
       <div style={{ maxWidth: 400, margin: '0 auto', padding: '0 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <span style={{ fontSize: 18 }}>Hide My Broadcasts <span style={{ color: '#888', fontSize: 18, marginLeft: 4, cursor: 'pointer' }}>?</span></span>
+          <span style={{ fontSize: 18 }}>Скрыть мои трансляции <span style={{ color: '#888', fontSize: 18, marginLeft: 4, cursor: 'pointer' }}>?</span></span>
           <label style={{ display: 'inline-block', position: 'relative', width: 48, height: 28 }}>
             <input type="checkbox" checked={hideBroadcasts} onChange={e => setHideBroadcasts(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
             <span style={{ position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0, background: hideBroadcasts ? '#1856f5' : '#444', borderRadius: 16, transition: 'background 0.2s' }} />
@@ -49,7 +49,7 @@ const ProfilePage: React.FC = () => {
           </label>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 0 }}>
-          <span style={{ fontSize: 18 }}>Ghost Mode</span>
+          <span style={{ fontSize: 18 }}>Режим невидимки</span>
           <label style={{ display: 'inline-block', position: 'relative', width: 48, height: 28 }}>
             <input type="checkbox" checked={ghostMode} onChange={e => setGhostMode(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }} />
             <span style={{ position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0, background: ghostMode ? '#1856f5' : '#444', borderRadius: 16, transition: 'background 0.2s' }} />
@@ -57,24 +57,24 @@ const ProfilePage: React.FC = () => {
           </label>
         </div>
         <div style={{ color: '#888', fontSize: 15, margin: '8px 0 18px 0', lineHeight: 1.4 }}>
-          Turn off Ghost Mode to allow friends and family to look out for you on the safety map.
+          Отключите режим невидимки, чтобы друзья и семья могли следить за вашей безопасностью на карте.
         </div>
       </div>
       {/* Статистика 2 */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 18px auto', maxWidth: 400, background: '#181818', borderRadius: 18, overflow: 'hidden' }}>
         <div style={{ flex: 1, textAlign: 'center', padding: '14px 0 10px 0' }}>
           <div style={{ fontSize: 18, fontWeight: 700 }}>1</div>
-          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>BROADCASTS</div>
+          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>ТРАНСЛЯЦИИ</div>
         </div>
         <div style={{ width: 1, height: 32, background: '#222' }} />
         <div style={{ flex: 1, textAlign: 'center', padding: '14px 0 10px 0' }}>
           <div style={{ fontSize: 18, fontWeight: 700 }}>0</div>
-          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>VERIFIED</div>
+          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>ПРОВЕРЕННЫЕ</div>
         </div>
         <div style={{ width: 1, height: 32, background: '#222' }} />
         <div style={{ flex: 1, textAlign: 'center', padding: '14px 0 10px 0' }}>
           <div style={{ fontSize: 18, fontWeight: 700 }}>0</div>
-          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>VIEWS</div>
+          <div style={{ color: '#888', fontSize: 13, fontWeight: 600, letterSpacing: 1, marginTop: 2 }}>ПРОСМОТРЫ</div>
         </div>
       </div>
       {/* Кнопки */}
@@ -83,19 +83,19 @@ const ProfilePage: React.FC = () => {
           <span style={{ color: '#7fff7f', fontSize: 22, display: 'flex', alignItems: 'center' }}>
             <svg width="22" height="22" fill="none" stroke="#7fff7f" strokeWidth="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/></svg>
           </span>
-          <span style={{ fontSize: 18, fontWeight: 600 }}>ADD FRIENDS</span>
+          <span style={{ fontSize: 18, fontWeight: 600 }}>ДОБАВИТЬ ДРУЗЕЙ</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '18px 0 0 0', cursor: 'pointer' }}>
           <span style={{ color: '#7fff7f', fontSize: 22, display: 'flex', alignItems: 'center' }}>
             <svg width="22" height="22" fill="none" stroke="#7fff7f" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M8 12h8"/></svg>
           </span>
-          <span style={{ fontSize: 18, fontWeight: 600 }}>APP SETTINGS</span>
+          <span style={{ fontSize: 18, fontWeight: 600 }}>НАСТРОЙКИ ПРИЛОЖЕНИЯ</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '18px 0 0 0', cursor: 'pointer' }}>
           <span style={{ color: '#7fff7f', fontSize: 22, display: 'flex', alignItems: 'center' }}>
             <svg width="22" height="22" fill="none" stroke="#7fff7f" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
           </span>
-          <span style={{ fontSize: 18, fontWeight: 600 }}>FAQ</span>
+          <span style={{ fontSize: 18, fontWeight: 600 }}>ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ</span>
         </div>
       </div>
       {/* Соцсети */}

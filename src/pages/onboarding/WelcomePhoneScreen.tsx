@@ -10,11 +10,11 @@ const WelcomePhoneScreen: React.FC<{ onContinue: (phone: string) => void }> = ({
     <div className={styles.root}>
       <div className={styles.content}>
         <div className={styles.title}>
-          Enter your phone<br />number to<br />sign up or log in.
+          Введите номер<br />телефона для<br />регистрации или входа.
         </div>
         <Input
           type="tel"
-          placeholder="+1 (___) ___-____"
+          placeholder="+7 (___) ___-____"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           onClear={() => setPhone('')}
@@ -25,11 +25,11 @@ const WelcomePhoneScreen: React.FC<{ onContinue: (phone: string) => void }> = ({
           disabled={!phone.trim()}
           onClick={() => onContinue(phone)}
         >
-          Continue
+          Продолжить
         </Button>
         <div className={styles.hint}>
-          Message and data rates may apply. By continuing, you agree<br />
-          to our <a href="#" tabIndex={-1}>Terms of Use</a> and <a href="#" tabIndex={-1}>Privacy Policy</a>.
+          Могут применяться тарифы на сообщения и передачу данных. Продолжая, вы соглашаетесь<br />
+          с нашими <a href="#" tabIndex={-1}>Условиями использования</a> и <a href="#" tabIndex={-1}>Политикой конфиденциальности</a>.
         </div>
       </div>
     </div>

@@ -5,11 +5,11 @@ import L from 'leaflet';
 import { useNavigate } from 'react-router-dom'; 
 import styles from './map.module.scss';
 const DEMO_FEATURES = [
-  '24/7 access to a safety agent who can actively monitor your safety',
-  'First responders sent to your exact location in an emergency',
-  'Public Citizen incident creation to get help from your community',
-  'Instant help response via Siri & Shake for agent safety shortcuts',
-  'Silent text chat with an agent when you need help discreetly',
+  'Круглосуточный доступ к агенту безопасности, который может активно следить за вашей безопасностью',
+  'Экстренные службы направляются на ваше точное местоположение в случае чрезвычайной ситуации',
+  'Создание инцидентов для получения помощи от вашего сообщества',
+  'Мгновенная помощь через Siri и встряхивание для быстрого доступа к агенту безопасности',
+  'Тихий текстовый чат с агентом, когда вам нужна помощь конфиденциально',
 ];
 
 const INCIDENTS = [
@@ -776,8 +776,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                   flexDirection: 'column',
                   alignItems: 'center'
                 }}>
-                  <div style={{color: '#fff', fontWeight: 700, fontSize: 22, lineHeight: 1, marginBottom: 2}}>2.3K users</div>
-                  <div style={{color: '#aaa', fontSize: 15, fontWeight: 500}}>within 0.2 mi</div>
+                  <div style={{color: '#fff', fontWeight: 700, fontSize: 22, lineHeight: 1, marginBottom: 2}}>2.3K пользователей</div>
+                  <div style={{color: '#aaa', fontSize: 15, fontWeight: 500}}>в пределах 0.2 км</div>
                 </div>
               </Popup>
             </Marker>
@@ -874,7 +874,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.98)', zIndex: 3000, display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', alignItems: 'center', padding: '20px 16px 12px 16px'}}>
                   <button onClick={() => setShowComments(false)} style={{width: 40, height: 40, borderRadius: '50%', background: 'rgba(60,60,60,0.95)', border: 'none', marginRight: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 24}}>&larr;</button>
-                  <div style={{fontSize: 20, fontWeight: 700, color: '#fff'}}>Chat · {comments.length}</div>
+                  <div style={{fontSize: 20, fontWeight: 700, color: '#fff'}}>Чат · {comments.length}</div>
                 </div>
                 <div style={{flex: 1, overflowY: 'auto', padding: '0 0 12px 0'}}>
                   {comments.map(c => (
@@ -883,7 +883,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                       <div style={{flex: 1}}>
                         <div style={{color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 2}}>{c.user}</div>
                         {c.text && <div style={{color: '#fff', fontSize: 16, marginBottom: c.image ? 8 : 0}}>{c.text}</div>}
-                        {c.image && <img src={c.image} alt="comment" style={{maxWidth: 180, borderRadius: 12, marginBottom: 4}} />}
+                        {c.image && <img src={c.image} alt="комментарий" style={{maxWidth: 180, borderRadius: 12, marginBottom: 4}} />}
                         <div style={{color: '#aaa', fontSize: 13}}>{c.time}</div>
                       </div>
                     </div>
@@ -966,11 +966,11 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                 </button>
                 <button style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'center'}}>
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-                  Follow
+                  Подписаться
                 </button>
                 <button style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'flex-end'}}>
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
-                  Share
+                  Поделиться
                 </button>
               </div>
             </div>
@@ -995,8 +995,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             <div style={{padding: '20px 16px'}}>
               <div style={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16}}>
                 <div>
-                  <div style={{fontSize: 15, color: '#aaa', marginBottom: 4}}>0.4 mi · Midtown</div>
-                  <div style={{fontSize: 24, fontWeight: 700, marginBottom: 8}}>Your Location</div>
+                  <div style={{fontSize: 15, color: '#aaa', marginBottom: 4}}>0.4 км · Центр</div>
+                  <div style={{fontSize: 24, fontWeight: 700, marginBottom: 8}}>Ваше местоположение</div>
                 </div>
                 <button 
                   onClick={() => setShowLocationModal(false)}
@@ -1018,7 +1018,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                   {/* Здесь можно добавить мини-карту или изображение локации */}
                 </div>
                 <div style={{flex: 1}}>
-                  <div style={{fontSize: 16, marginBottom: 8}}>11 alerts past 24 hr</div>
+                  <div style={{fontSize: 16, marginBottom: 8}}>11 оповещений за последние 24 часа</div>
                   <button style={{
                     background: '#e53935',
                     color: '#fff',
@@ -1042,7 +1042,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                         <circle cx="12" cy="12" r="10"/>
                       </svg>
                     </span>
-                    Go Live
+                    Начать трансляцию
                   </button>
                 </div>
               </div>
@@ -1081,7 +1081,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 8v8M8 12h8"/>
                   </svg>
-                  Follow
+                  Подписаться
                 </button>
                 <button style={{
                   flex: 1,
@@ -1098,7 +1098,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M4 12h16M14 6l6 6-6 6"/>
                   </svg>
-                  Share
+                  Поделиться
                 </button>
               </div>
             </div>
@@ -1119,8 +1119,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
           }}>
             {/* Верхняя панель */}
             <div style={{padding: '32px 20px 0 20px', color: '#fff'}}>
-              <div style={{fontSize: 32, fontWeight: 700, marginBottom: 8}}>Go Live</div>
-              <div style={{fontSize: 18, color: '#ccc', marginBottom: 0}}>12 Citizen users within 1.5 mi</div>
+              <div style={{fontSize: 32, fontWeight: 700, marginBottom: 8}}>Начать трансляцию</div>
+              <div style={{fontSize: 18, color: '#ccc', marginBottom: 0}}>12 пользователей Гражданин в радиусе 1.5 км</div>
               <button onClick={handleCloseGoLive} style={{position: 'absolute', top: 24, right: 20, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M7 10l5 5 5-5"/></svg>
               </button>
@@ -1139,8 +1139,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               )}
               <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 24px'}}>
                 <div style={{display: 'flex', gap: 24, marginBottom: 12}}>
-                  <span style={{color: '#fff', fontWeight: 700, fontSize: 20}}>Incident</span>
-                  <span style={{color: '#fff', opacity: 0.7, fontWeight: 500, fontSize: 20}}>Good Vibes</span>
+                  <span style={{color: '#fff', fontWeight: 700, fontSize: 20}}>Инцидент</span>
+                  <span style={{color: '#fff', opacity: 0.7, fontWeight: 500, fontSize: 20}}>Хорошее настроение</span>
                 </div>
                 <button style={{width: 90, height: 90, borderRadius: '50%', background: '#000', border: '6px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 4px #222'}}>
                   <div style={{width: 64, height: 64, borderRadius: '50%', background: '#e53935', border: '4px solid #222'}}></div>
@@ -1160,8 +1160,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   return (
     <div style={{height: '100dvh', width: '100vw', background: '#000', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'}}>
       <div style={{marginBottom: 32, textAlign: 'center'}}>
-        <div style={{fontSize: 32, fontWeight: 700, marginBottom: 12}}>Premium Setup Complete</div>
-        <div style={{fontSize: 18, opacity: 0.7, marginBottom: 24}}>Your Premium membership includes:</div>
+        <div style={{fontSize: 32, fontWeight: 700, marginBottom: 12}}>Настройка Премиум завершена</div>
+        <div style={{fontSize: 18, opacity: 0.7, marginBottom: 24}}>Ваше Премиум-членство включает:</div>
         <ul style={{textAlign: 'left', fontSize: 18, lineHeight: 1.5, margin: '0 auto 24px auto', maxWidth: 400}}>
           {DEMO_FEATURES.map((f, i) => (
             <li key={i} style={{marginBottom: 10, listStyle: 'none'}}>
@@ -1170,13 +1170,13 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
           ))}
         </ul>
         <div style={{fontSize: 16, opacity: 0.7, marginBottom: 24}}>
-          See what it's like to be connected to your safety agent
+          Узнайте, каково это - быть подключенным к вашему агенту безопасности
         </div>
         <button
           style={{background: '#1856f5', color: '#fff', fontSize: 20, border: 'none', borderRadius: 32, padding: '16px 32px', width: 320, maxWidth: '90vw', fontWeight: 700, cursor: 'pointer'}}
           onClick={handleShowLocation}
         >
-          Show my location
+          Показать мое местоположение
         </button>
         {error && <div style={{color: 'red', marginTop: 16}}>{error}</div>}
       </div>

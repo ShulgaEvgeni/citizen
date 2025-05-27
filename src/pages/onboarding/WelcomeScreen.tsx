@@ -10,16 +10,16 @@ const WelcomeScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
           <div className={styles.card}>
             <span className={styles.icon} />
             <div>
-              <div className={styles.cardTitle}>Vehicle Pursuit of Armed Suspect</div>
-              <div className={styles.cardSubtitle}>400 ft away</div>
+              <div className={styles.cardTitle}>Преследование вооруженного подозреваемого</div>
+              <div className={styles.cardSubtitle}>400 метров</div>
             </div>
           </div>
           <div className={styles.card}>
             <span className={styles.icon} />
             <div>
-              <div className={styles.cardTitle}>New Message: Agent Jackie</div>
+              <div className={styles.cardTitle}>Новое сообщение: Агент Джеки</div>
               <div className={styles.cardSubtitle}>
-                "I'm monitoring you until you get home safe"
+                "Я слежу за вашей безопасностью, пока вы не доберетесь домой"
               </div>
             </div>
           </div>
@@ -27,19 +27,19 @@ const WelcomeScreen: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             <span className={styles.icon} />
             <div>
               <div className={styles.cardTitle}>
-                <span role="img" aria-label="green heart">💚</span> Missing Boy Found
+                <span role="img" aria-label="зеленое сердце">💚</span> Пропавший мальчик найден
               </div>
               <div className={styles.cardSubtitle}>
-                Citizen community helps find loved one
+                Сообщество CITIZEN помогло найти близкого человека
               </div>
             </div>
           </div>
         </div>
         <div className={styles.bottom}>
           <div className={styles.welcomeText}>
-            Live safely and confidently.<br />Welcome to Citizen
+            Живите безопасно и уверенно.<br />Добро пожаловать в CITIZEN
           </div>
-          <button className={styles.button} onClick={onStart}>Get Started</button>
+          <button className={styles.button} onClick={onStart}>Начать</button>
         </div>
       </div>
     </div>
