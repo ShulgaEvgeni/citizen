@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect, useCallback, useRef } from 'react'; 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom'; 
 import styles from './map.module.scss';
+import { startSimulation, getSimulationState, addCommentToPoint } from '../../utils/simulation';
+import type { SimulationPoint } from '../../utils/simulation';
+
 const DEMO_FEATURES = [
   'Круглосуточный доступ к агенту безопасности, который может активно следить за вашей безопасностью',
   'Экстренные службы направляются на ваше точное местоположение в случае чрезвычайной ситуации',
@@ -12,7 +15,7 @@ const DEMO_FEATURES = [
   'Тихий текстовый чат с агентом, когда вам нужна помощь конфиденциально',
 ];
 
-const INCIDENTS = [
+export const INCIDENTS = [
   // Московская область (20)
   {
     id: 1,
@@ -417,12 +420,6 @@ const INCIDENTS = [
   },
 ];
 
-const COMMENTS = [
-  { id: 1, user: 'Иван', text: 'Видел полицию на месте', time: '2 мин назад' },
-  { id: 2, user: 'Анна', text: '', image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80', time: '5 мин назад' },
-  { id: 3, user: 'Олег', text: 'Всё спокойно', time: '10 мин назад' },
-];
-
 function SetViewOnLocation({ position }: { position: [number, number] }) {
   const map = useMap();
   useEffect(() => {
@@ -483,7 +480,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [showRealMap, setShowRealMap] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number] | null>(null);
-  const [activeIncident, setActiveIncident] = useState<typeof INCIDENTS[0] | null>(null);
+  const [activeIncident, setActiveIncident] = useState<SimulationPoint | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showGoLiveModal, setShowGoLiveModal] = useState(false);
   const [cameraAllowed, setCameraAllowed] = useState<boolean | null>(null);
@@ -491,7 +488,6 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
-  // Состояния для hover-эффекта
   const [hoverLeft, setHoverLeft] = useState(false);
   const [hoverRight, setHoverRight] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -501,11 +497,54 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [commentImage, setCommentImage] = useState<string | null>(null);
-  const [comments, setComments] = useState(COMMENTS);
   const [goLiveMarker, setGoLiveMarker] = useState<[number, number] | null>(null);
+  const [simulationPoints, setSimulationPoints] = useState<SimulationPoint[]>([]);
   const navigate = useNavigate();
   const [isFrontCamera, setIsFrontCamera] = useState(false);
-  console.log('showGoLiveModal', showGoLiveModal);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoIncident, setVideoIncident] = useState<SimulationPoint | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Функция для обновления состояния из localStorage
+  const updateStateFromStorage = useCallback(() => {
+    const state = getSimulationState();
+    setSimulationPoints(state.points);
+    
+    // Если у нас открыт чат, обновляем активный инцидент
+    if (activeIncident) {
+      const updatedPoint = state.points.find(p => p.id === activeIncident.id);
+      if (updatedPoint) {
+        setActiveIncident(updatedPoint);
+      }
+    }
+  }, [activeIncident]);
+
+  // Эффект для запуска симуляции при получении позиции
+  useEffect(() => {
+    if (position) {
+      startSimulation(position);
+    }
+  }, [position]);
+
+  // Эффект для обновления точек симуляции
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateStateFromStorage();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [updateStateFromStorage]);
+
+  // Эффект для отслеживания изменений в localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      updateStateFromStorage();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [updateStateFromStorage]);
+
   // Проверяем разрешение на геолокацию при монтировании
   useEffect(() => {
     if (!navigator.permissions || !navigator.geolocation) return;
@@ -655,12 +694,24 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
     }
   };
 
-
   useEffect(() => {
     console.log('videoStream', videoStream);
   }, [videoStream]);
 
-  if (showRealMap  ) {
+  useEffect(() => {
+    if (showVideoModal && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [videoIncident?.comments, showVideoModal]);
+
+  useEffect(() => {
+    if (showVideoModal && videoIncident) {
+      const updated = simulationPoints.find(p => p.id === videoIncident.id);
+      if (updated) setVideoIncident(updated);
+    }
+  }, [simulationPoints, showVideoModal, videoIncident]);
+
+  if (showRealMap) {
     return (
       <div style={{height: '100dvh', width: '100vw', position: 'relative', paddingBottom: 90}}>
         {/* Модалка поиска */}
@@ -786,12 +837,21 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
           {position &&
           <SetViewOnLocation position={position} />
           } 
-            {INCIDENTS.map(incident => (
+            {simulationPoints.map(point => (
               <Marker
-                key={incident.id}
-                position={incident.position as [number, number]}
-                eventHandlers={{ click: () => setActiveIncident(incident) }}
-                icon={getIncidentIcon(incident.image, incident.color) as L.Icon}
+                key={point.id}
+                position={point.position}
+                eventHandlers={{
+                  click: () => {
+                    if (point.video) {
+                      setVideoIncident(point);
+                      setShowVideoModal(true);
+                    } else {
+                      setActiveIncident(point);
+                    }
+                  }
+                }}
+                icon={getIncidentIcon(point.image, point.color) as L.Icon}
               />
             ))} 
           {goLiveMarker && (
@@ -806,7 +866,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                 address: 'Ваше местоположение',
                 description: 'Трансляция завершена.',
                 updated: 'только что',
-                views: 0
+                views: 0,
+                comments: []
               }) }}
             /> 
           )}
@@ -869,15 +930,14 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         */}
         {activeIncident && (
           <>
-            {/* Модалка комментариев */}
             {showComments && (
               <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.98)', zIndex: 3000, display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', alignItems: 'center', padding: '20px 16px 12px 16px'}}>
                   <button onClick={() => setShowComments(false)} style={{width: 40, height: 40, borderRadius: '50%', background: 'rgba(60,60,60,0.95)', border: 'none', marginRight: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 24}}>&larr;</button>
-                  <div style={{fontSize: 20, fontWeight: 700, color: '#fff'}}>Чат · {comments.length}</div>
+                  <div style={{fontSize: 20, fontWeight: 700, color: '#fff'}}>Чат · {activeIncident.comments?.length || 0}</div>
                 </div>
                 <div style={{flex: 1, overflowY: 'auto', padding: '0 0 12px 0'}}>
-                  {comments.map(c => (
+                  {activeIncident.comments?.map((c: SimulationPoint['comments'][0]) => (
                     <div key={c.id} style={{padding: '12px 20px', display: 'flex', alignItems: 'flex-start', gap: 12}}>
                       <div style={{width: 36, height: 36, borderRadius: '50%', background: '#222', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18}}>{c.user[0]}</div>
                       <div style={{flex: 1}}>
@@ -910,7 +970,14 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                   <button
                     onClick={() => {
                       if (commentText.trim() || commentImage) {
-                        setComments([...comments, { id: Date.now(), user: 'Вы', text: commentText, ...(commentImage ? { image: commentImage } : {}), time: 'только что' }]);
+                        const newComment = {
+                          id: Date.now(),
+                          user: 'Вы',
+                          text: commentText,
+                          ...(commentImage ? { image: commentImage } : {}),
+                          time: 'только что'
+                        };
+                        addCommentToPoint(activeIncident.id, newComment);
                         setCommentText('');
                         setCommentImage(null);
                       }
@@ -962,7 +1029,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0, padding: '0 16px 8px 16px', marginTop: 18}}>
                 <button onClick={() => setShowComments(true)} style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'flex-start'}}>
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  {comments.length}
+                  {activeIncident.comments?.length}
                 </button>
                 <button style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'center'}}>
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
@@ -1149,6 +1216,88 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               <button style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px'}}>
                 <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"/><path d="M18 10v16"/><path d="M10 18h16"/></svg>
               </button>
+            </div>
+          </div>
+        )}
+
+        {showVideoModal && videoIncident && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 4000, background: '#000',
+            width: '100vw', height: '100vh',
+            overflow: 'hidden',
+          }}>
+            {/* Видео на весь экран */}
+            <video src={videoIncident.video} autoPlay controls
+              style={{
+                position: 'absolute',
+                top: 0, left: 0, width: '100vw', height: '100vh',
+                objectFit: 'cover',
+                zIndex: 4000,
+                background: '#000'
+              }}
+            />
+            {/* Верхняя панель поверх видео */}
+            <div style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0,
+              zIndex: 4100,
+              display: 'flex', alignItems: 'center', padding: 16
+            }}>
+              <img src={videoIncident.image} alt="" style={{width: 40, height: 40, borderRadius: '50%', marginRight: 12}} />
+              <span style={{color: '#fff', fontWeight: 700, fontSize: 18}}>{videoIncident.title}</span>
+              <span style={{background: '#e53935', color: '#fff', borderRadius: 8, padding: '2px 8px', marginLeft: 12, fontWeight: 600, fontSize: 14}}>ПРЯМОЙ ЭФИР</span>
+              <span style={{color: '#fff', marginLeft: 'auto', fontSize: 16}}>👁 {videoIncident.views}</span>
+              <button onClick={() => setShowVideoModal(false)} style={{marginLeft: 16, background: 'none', border: 'none', color: '#fff', fontSize: 28, cursor: 'pointer'}}>&times;</button>
+            </div>
+            {/* Чат поверх видео, снизу */}
+            <div style={{
+              position: 'absolute',
+              left: 0, right: 0, bottom: 0,
+              height: '40vh',
+              background: 'rgba(0,0,0,0.35)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              zIndex: 4100
+            }}>
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end'
+              }}>
+                {videoIncident.comments.map(c => (
+                  <div key={c.id} style={{color: '#fff', marginBottom: 8}}>
+                    <b>{c.user}:</b> {c.text} <span style={{color: '#aaa', fontSize: 12}}>{c.time}</span>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+              <div style={{display: 'flex', padding: 12}}>
+                <input
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  placeholder="Комментарий"
+                  style={{flex: 1, borderRadius: 24, border: 'none', background: '#222', color: '#fff', fontSize: 17, padding: '12px 16px', outline: 'none'}}
+                />
+                <button
+                  onClick={() => {
+                    if (commentText.trim()) {
+                      const newComment = {
+                        id: Date.now(),
+                        user: 'Вы',
+                        text: commentText,
+                        time: 'только что'
+                      };
+                      addCommentToPoint(videoIncident.id, newComment);
+                      setCommentText('');
+                    }
+                  }}
+                  style={{background: '#1856f5', color: '#fff', border: 'none', borderRadius: 24, fontWeight: 700, fontSize: 17, padding: '10px 18px', marginLeft: 4, cursor: 'pointer'}}
+                >Отправить</button>
+              </div>
             </div>
           </div>
         )}
