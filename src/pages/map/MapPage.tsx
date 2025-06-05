@@ -1223,14 +1223,14 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         {showVideoModal && videoIncident && (
           <div style={{
             position: 'fixed', inset: 0, zIndex: 4000, background: '#000',
-            width: '100vw', height: '100vh',
+            width: '100vw', height: '100dvh',
             overflow: 'hidden',
           }}>
             {/* Видео на весь экран */}
             <video src={videoIncident.video} autoPlay controls
               style={{
                 position: 'absolute',
-                top: 0, left: 0, width: '100vw', height: '100vh',
+                top: 0, left: 0, width: '100vw', height: '100dvh',
                 objectFit: 'cover',
                 zIndex: 4000,
                 background: '#000'
@@ -1253,7 +1253,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             <div style={{
               position: 'absolute',
               left: 0, right: 0, bottom: 0,
-              height: '40vh',
+              height: '40dvh',
               background: 'rgba(0,0,0,0.35)',
               display: 'flex',
               flexDirection: 'column',
