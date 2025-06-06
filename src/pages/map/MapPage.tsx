@@ -1363,7 +1363,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               </button>
             </div>
             {/* Видео */}
-            <video ref={videoRef} autoPlay playsInline muted style={{flex: 1, width: '100%', height: '100%', objectFit: 'cover', background: '#000', display: 'block', position: 'absolute', top: 0, left: 0, zIndex: -1}} />
+            <video ref={videoRef} autoPlay playsInline style={{flex: 1, width: '100%', height: '100%', objectFit: 'cover', background: '#000', display: 'block', position: 'absolute', top: 0, left: 0, zIndex: -1}} />
             {/* Нижняя панель */}
             <div style={{position: 'absolute', left: 0, right: 0, bottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly'}}>
               {/* Кнопка переключения камеры, только если камер больше одной */}
@@ -1443,7 +1443,6 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               src={videoIncident.video} 
               autoPlay 
               playsInline
-              muted
               style={{
                 position: 'absolute',
                 top: 0, left: 0, width: '100vw', height: '100dvh',
