@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'; 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import L, { point } from 'leaflet';
 import { useNavigate } from 'react-router-dom'; 
 import styles from './map.module.scss';
 import { startSimulation, getSimulationState, addCommentToPoint } from '../../utils/simulation';
@@ -19,7 +19,7 @@ export const INCIDENTS = [
   // Московская область (20)
   {
     id: 1,
-    position: [55.7558, 37.6173],
+    position: { lat: 55.7558, lng: 37.6173 },
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80',
     title: 'Красная площадь',
     address: 'Красная площадь, Москва',
@@ -29,7 +29,7 @@ export const INCIDENTS = [
   },
   {
     id: 2,
-    position: [55.7517, 37.6176],
+    position: { lat: 55.7517, lng: 37.6176 },
     color: 'red',
     title: 'Пожар',
     address: 'ул. Тверская, 7',
@@ -39,7 +39,7 @@ export const INCIDENTS = [
   },
   {
     id: 3,
-    position: [55.7601, 37.6187],
+    position: { lat: 55.7601, lng: 37.6187 },
     color: 'yellow',
     title: 'Пробка',
     address: 'ул. Новый Арбат',
@@ -49,7 +49,7 @@ export const INCIDENTS = [
   },
   {
     id: 4,
-    position: [55.7339, 37.5886],
+    position: { lat: 55.7339, lng: 37.5886 },
     color: 'green',
     title: 'Парк Горького',
     address: 'ул. Крымский Вал, 9',
@@ -59,7 +59,7 @@ export const INCIDENTS = [
   },
   {
     id: 5,
-    position: [55.7520, 37.5950],
+    position: { lat: 55.7520, lng: 37.5950 },
     color: 'gray',
     title: 'Арбат',
     address: 'ул. Арбат',
@@ -69,7 +69,7 @@ export const INCIDENTS = [
   },
   {
     id: 6,
-    position: [55.7485, 37.5377],
+    position: { lat: 55.7485, lng: 37.5377 },
     image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80',
     title: 'Москва-Сити',
     address: 'Пресненская наб., 12',
@@ -79,7 +79,7 @@ export const INCIDENTS = [
   },
   {
     id: 7,
-    position: [55.7299, 37.6036],
+    position: { lat: 55.7299, lng: 37.6036 },
     color: 'red',
     title: 'ДТП',
     address: 'ул. Садовая',
@@ -89,7 +89,7 @@ export const INCIDENTS = [
   },
   {
     id: 8,
-    position: [55.7824, 37.5986],
+    position: { lat: 55.7824, lng: 37.5986 },
     color: 'yellow',
     title: 'Праздник',
     address: 'ВДНХ',
@@ -99,7 +99,7 @@ export const INCIDENTS = [
   },
   {
     id: 9,
-    position: [55.7033, 37.5302],
+    position: { lat: 55.7033, lng: 37.5302 },
     color: 'green',
     title: 'Лужники',
     address: 'ул. Лужники, 24',
@@ -109,7 +109,7 @@ export const INCIDENTS = [
   },
   {
     id: 10,
-    position: [55.7652, 37.6387],
+    position: { lat: 55.7652, lng: 37.6387 },
     color: 'gray',
     title: 'Сад Эрмитаж',
     address: 'ул. Каретный Ряд, 3',
@@ -119,7 +119,7 @@ export const INCIDENTS = [
   },
   {
     id: 11,
-    position: [55.8000, 37.5833],
+    position: { lat: 55.8000, lng: 37.5833 },
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80',
     title: 'Север Москвы',
     address: 'ул. Ленина, 1',
@@ -129,7 +129,7 @@ export const INCIDENTS = [
   },
   {
     id: 12,
-    position: [55.7100, 37.6000],
+    position: { lat: 55.7100, lng: 37.6000 },
     color: 'red',
     title: 'Полиция',
     address: 'ул. Южная, 5',
@@ -139,7 +139,7 @@ export const INCIDENTS = [
   },
   {
     id: 13,
-    position: [55.7200, 37.6500],
+    position: { lat: 55.7200, lng: 37.6500 },
     color: 'yellow',
     title: 'Маршрут изменён',
     address: 'ул. Восточная, 8',
@@ -149,7 +149,7 @@ export const INCIDENTS = [
   },
   {
     id: 14,
-    position: [55.7300, 37.6700],
+    position: { lat: 55.7300, lng: 37.6700 },
     color: 'green',
     title: 'Открытие',
     address: 'ул. Новая, 10',
@@ -159,7 +159,7 @@ export const INCIDENTS = [
   },
   {
     id: 15,
-    position: [55.7400, 37.6800],
+    position: { lat: 55.7400, lng: 37.6800 },
     color: 'gray',
     title: 'Тихо',
     address: 'ул. Западная, 12',
@@ -169,7 +169,7 @@ export const INCIDENTS = [
   },
   {
     id: 16,
-    position: [55.7500, 37.6900],
+    position: { lat: 55.7500, lng: 37.6900 },
     image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80',
     title: 'Центр',
     address: 'ул. Центральная, 14',
@@ -179,7 +179,7 @@ export const INCIDENTS = [
   },
   {
     id: 17,
-    position: [55.7600, 37.7000],
+    position: { lat: 55.7600, lng: 37.7000 },
     color: 'red',
     title: 'Скорая',
     address: 'ул. Медицинская, 16',
@@ -189,7 +189,7 @@ export const INCIDENTS = [
   },
   {
     id: 18,
-    position: [55.7700, 37.7100],
+    position: { lat: 55.7700, lng: 37.7100 },
     color: 'yellow',
     title: 'Потеряно',
     address: 'ул. Потерянная, 18',
@@ -199,7 +199,7 @@ export const INCIDENTS = [
   },
   {
     id: 19,
-    position: [55.7800, 37.7200],
+    position: { lat: 55.7800, lng: 37.7200 },
     color: 'green',
     title: 'Найдено',
     address: 'ул. Найденная, 20',
@@ -209,7 +209,7 @@ export const INCIDENTS = [
   },
   {
     id: 20,
-    position: [55.7900, 37.7300],
+    position: { lat: 55.7900, lng: 37.7300 },
     color: 'gray',
     title: 'Безопасно',
     address: 'ул. Безопасная, 22',
@@ -220,7 +220,7 @@ export const INCIDENTS = [
   // Санкт-Петербург (20)
   {
     id: 21,
-    position: [59.9343, 30.3351],
+    position: { lat: 59.9343, lng: 30.3351 },
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80',
     title: 'Невский проспект',
     address: 'Невский проспект, СПб',
@@ -230,7 +230,7 @@ export const INCIDENTS = [
   },
   {
     id: 22,
-    position: [59.9311, 30.3609],
+    position: { lat: 59.9311, lng: 30.3609 },
     color: 'red',
     title: 'ДТП',
     address: 'ул. Садовая, СПб',
@@ -240,7 +240,7 @@ export const INCIDENTS = [
   },
   {
     id: 23,
-    position: [59.9386, 30.3141],
+    position: { lat: 59.9386, lng: 30.3141 },
     color: 'yellow',
     title: 'Пробка',
     address: 'ул. Литейный, СПб',
@@ -250,7 +250,7 @@ export const INCIDENTS = [
   },
   {
     id: 24,
-    position: [59.9457, 30.3896],
+    position: { lat: 59.9457, lng: 30.3896 },
     color: 'green',
     title: 'Парк',
     address: 'ул. Парк, СПб',
@@ -260,7 +260,7 @@ export const INCIDENTS = [
   },
   {
     id: 25,
-    position: [59.9500, 30.3167],
+    position: { lat: 59.9500, lng: 30.3167 },
     color: 'gray',
     title: 'Петропавловская крепость',
     address: 'Петропавловская крепость, СПб',
@@ -270,7 +270,7 @@ export const INCIDENTS = [
   },
   {
     id: 26,
-    position: [59.9600, 30.3200],
+    position: { lat: 59.9600, lng: 30.3200 },
     image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80',
     title: 'Север СПб',
     address: 'ул. Северная, СПб',
@@ -280,7 +280,7 @@ export const INCIDENTS = [
   },
   {
     id: 27,
-    position: [59.9700, 30.3300],
+    position: { lat: 59.9700, lng: 30.3300 },
     color: 'red',
     title: 'Пожар',
     address: 'ул. Пожарная, СПб',
@@ -290,7 +290,7 @@ export const INCIDENTS = [
   },
   {
     id: 28,
-    position: [59.9800, 30.3400],
+    position: { lat: 59.9800, lng: 30.3400 },
     color: 'yellow',
     title: 'Праздник',
     address: 'ул. Праздничная, СПб',
@@ -300,7 +300,7 @@ export const INCIDENTS = [
   },
   {
     id: 29,
-    position: [59.9900, 30.3500],
+    position: { lat: 59.9900, lng: 30.3500 },
     color: 'green',
     title: 'Стадион',
     address: 'ул. Спортивная, СПб',
@@ -310,7 +310,7 @@ export const INCIDENTS = [
   },
   {
     id: 30,
-    position: [59.9950, 30.3600],
+    position: { lat: 59.9950, lng: 30.3600 },
     color: 'gray',
     title: 'Тихо',
     address: 'ул. Тихая, СПб',
@@ -320,7 +320,7 @@ export const INCIDENTS = [
   },
   {
     id: 31,
-    position: [59.9000, 30.3000],
+    position: { lat: 59.9000, lng: 30.3000 },
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80',
     title: 'Юг СПб',
     address: 'ул. Южная, СПб',
@@ -330,7 +330,7 @@ export const INCIDENTS = [
   },
   {
     id: 32,
-    position: [59.9100, 30.3100],
+    position: { lat: 59.9100, lng: 30.3100 },
     color: 'red',
     title: 'Полиция',
     address: 'ул. Полицейская, СПб',
@@ -340,7 +340,7 @@ export const INCIDENTS = [
   },
   {
     id: 33,
-    position: [59.9200, 30.3200],
+    position: { lat: 59.9200, lng: 30.3200 },
     color: 'yellow',
     title: 'Маршрут изменён',
     address: 'ул. Изменённая, СПб',
@@ -350,7 +350,7 @@ export const INCIDENTS = [
   },
   {
     id: 34,
-    position: [59.9300, 30.3300],
+    position: { lat: 59.9300, lng: 30.3300 },
     color: 'green',
     title: 'Открытие',
     address: 'ул. Новая, СПб',
@@ -360,7 +360,7 @@ export const INCIDENTS = [
   },
   {
     id: 35,
-    position: [59.9400, 30.3400],
+    position: { lat: 59.9400, lng: 30.3400 },
     color: 'gray',
     title: 'Безопасно',
     address: 'ул. Безопасная, СПб',
@@ -370,7 +370,7 @@ export const INCIDENTS = [
   },
   {
     id: 36,
-    position: [59.9500, 30.3500],
+    position: { lat: 59.9500, lng: 30.3500 },
     image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=200&q=80',
     title: 'Центр СПб',
     address: 'ул. Центральная, СПб',
@@ -380,7 +380,7 @@ export const INCIDENTS = [
   },
   {
     id: 37,
-    position: [59.9600, 30.3600],
+    position: { lat: 59.9600, lng: 30.3600 },
     color: 'red',
     title: 'Скорая',
     address: 'ул. Медицинская, СПб',
@@ -390,7 +390,7 @@ export const INCIDENTS = [
   },
   {
     id: 38,
-    position: [59.9700, 30.3700],
+    position: { lat: 59.9700, lng: 30.3700 },
     color: 'yellow',
     title: 'Потеряно',
     address: 'ул. Потерянная, СПб',
@@ -400,7 +400,7 @@ export const INCIDENTS = [
   },
   {
     id: 39,
-    position: [59.9800, 30.3800],
+    position: { lat: 59.9800, lng: 30.3800 },
     color: 'green',
     title: 'Найдено',
     address: 'ул. Найденная, СПб',
@@ -410,7 +410,7 @@ export const INCIDENTS = [
   },
   {
     id: 40,
-    position: [59.9900, 30.3900],
+    position: { lat: 59.9900, lng: 30.3900 },
     color: 'gray',
     title: 'Тестовая точка',
     address: 'ул. Тестовая, СПб',
@@ -430,6 +430,7 @@ function SetViewOnLocation({ position }: { position: [number, number] }) {
 
 // Кастомная функция для создания иконки
 function getIncidentIcon(image?: string, color?: string) {
+  // Всегда используем изображение, если оно есть
   if (image) {
     let border = '#bbb';
     if (color === 'red') border = '#e53935';
@@ -444,6 +445,7 @@ function getIncidentIcon(image?: string, color?: string) {
       popupAnchor: [0, -74],
     });
   } else {
+    // Если изображения нет, используем цветную точку
     let bg = '#bbb';
     if (color === 'red') bg = '#e53935';
     if (color === 'yellow') bg = '#ffd600';
@@ -503,6 +505,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [isFrontCamera, setIsFrontCamera] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoIncident, setVideoIncident] = useState<SimulationPoint | null>(null);
+  const [activeTab, setActiveTab] = useState<'Инцидент' | 'Событие'>('Инцидент');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Функция для обновления состояния из localStorage
@@ -680,17 +683,73 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   // Функция для закрытия Go Live
   const handleCloseGoLive = () => {
-    // Останавливаем все камеры
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    } 
     setShowGoLiveModal(false);
-    setCurrentDeviceId(null);
-    // Ставим маркер на карту по текущей позиции
-    if (position) {
-      setGoLiveMarker(position);
+    if (videoRef.current) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  // Функция для начала записи
+  const handleStartRecording = () => {
+    if (position && videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const videoUrl = URL.createObjectURL(blob);
+
+        const newPoint: SimulationPoint = {
+          id: Date.now(),
+          position: position,
+          title: activeTab === 'Инцидент' ? 'Новый инцидент' : 'Новое событие',
+          address: 'Ваше местоположение',
+          description: 'Прямая трансляция',
+          updated: 'только что',
+          views: 0,
+          comments: [],
+          color: activeTab === 'Инцидент' ? 'red' : 'green',
+          video: videoUrl,
+          image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80'
+        };
+
+        // Добавляем точку в симуляцию
+        const state = getSimulationState();
+        state.points.push(newPoint);
+        localStorage.setItem('simulationState', JSON.stringify(state));
+        setSimulationPoints(state.points);
+        
+        setVideoIncident(newPoint);
+        setShowVideoModal(true);
+        setShowGoLiveModal(false);
+      };
+
+      // Начинаем запись
+      mediaRecorder.start();
+      
+      // Останавливаем запись через 10 секунд
+      setTimeout(() => {
+        mediaRecorder.stop();
+        // Останавливаем камеру после записи
+        if (videoRef.current) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+          }
+          videoRef.current.srcObject = null;
+        }
+      }, 10000);
     }
   };
 
@@ -827,7 +886,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                   flexDirection: 'column',
                   alignItems: 'center'
                 }}>
-                  <div style={{color: '#fff', fontWeight: 700, fontSize: 22, lineHeight: 1, marginBottom: 2}}>2.3K пользователей</div>
+                  <div style={{color: '#fff', fontWeight: 700, fontSize: 22, lineHeight: 1, marginBottom: 2}}>2.3K граждан</div>
                   <div style={{color: '#aaa', fontSize: 15, fontWeight: 500}}>в пределах 0.2 км</div>
                 </div>
               </Popup>
@@ -837,7 +896,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
           {position &&
           <SetViewOnLocation position={position} />
           } 
-            {simulationPoints.map(point => (
+            {[...INCIDENTS, ...simulationPoints].map(point => (
               <Marker
                 key={point.id}
                 position={point.position}
@@ -851,7 +910,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                     }
                   }
                 }}
-                icon={getIncidentIcon(point.image, point.color) as L.Icon}
+                icon={getIncidentIcon(point.video ? point.image : undefined , point.color) as L.Icon}
               />
             ))} 
           {goLiveMarker && (
@@ -949,7 +1008,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                     </div>
                   ))}
                 </div>
-                <div style={{padding: '8px 12px 18px 12px', background: 'rgba(24,24,24,0.98)', display: 'flex', alignItems: 'center', gap: 8}}>
+                <div style={{padding: '8px 12px 18px 12px', background: 'linear-gradient(to top, rgba(0,0,0,0.35), rgba(0,0,0,0.05))', display: 'flex', alignItems: 'center', gap: 8}}>
                   <input
                     value={commentText}
                     onChange={e => setCommentText(e.target.value)}
@@ -1187,7 +1246,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             {/* Верхняя панель */}
             <div style={{padding: '32px 20px 0 20px', color: '#fff'}}>
               <div style={{fontSize: 32, fontWeight: 700, marginBottom: 8}}>Начать трансляцию</div>
-              <div style={{fontSize: 18, color: '#ccc', marginBottom: 0}}>12 пользователей Гражданин в радиусе 1.5 км</div>
+              <div style={{fontSize: 18, color: '#ccc', marginBottom: 0}}>12 граждан в радиусе 1.5 км</div>
               <button onClick={handleCloseGoLive} style={{position: 'absolute', top: 24, right: 20, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M7 10l5 5 5-5"/></svg>
               </button>
@@ -1206,11 +1265,53 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               )}
               <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 24px'}}>
                 <div style={{display: 'flex', gap: 24, marginBottom: 12}}>
-                  <span style={{color: '#fff', fontWeight: 700, fontSize: 20}}>Инцидент</span>
-                  <span style={{color: '#fff', opacity: 0.7, fontWeight: 500, fontSize: 20}}>Хорошее настроение</span>
+                  <span 
+                    style={{
+                      color: '#fff', 
+                      fontWeight: activeTab === 'Инцидент' ? 700 : 500, 
+                      fontSize: 20,
+                      opacity: activeTab === 'Инцидент' ? 1 : 0.7,
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setActiveTab('Инцидент')}
+                  >
+                    Инцидент
+                  </span>
+                  <span 
+                    style={{
+                      color: '#fff', 
+                      fontWeight: activeTab === 'Событие' ? 700 : 500, 
+                      fontSize: 20,
+                      opacity: activeTab === 'Событие' ? 1 : 0.7,
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setActiveTab('Событие')}
+                  >
+                    Событие
+                  </span>
                 </div>
-                <button style={{width: 90, height: 90, borderRadius: '50%', background: '#000', border: '6px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 4px #222'}}>
-                  <div style={{width: 64, height: 64, borderRadius: '50%', background: '#e53935', border: '4px solid #222'}}></div>
+                <button 
+                  onClick={handleStartRecording}
+                  style={{
+                    width: 90, 
+                    height: 90, 
+                    borderRadius: '50%', 
+                    background: '#000', 
+                    border: '6px solid #fff', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    boxShadow: '0 0 0 4px #222',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{
+                    width: 64, 
+                    height: 64, 
+                    borderRadius: '50%', 
+                    background: activeTab === 'Инцидент' ? '#e53935' : '#43a047', 
+                    border: '4px solid #222'
+                  }}></div>
                 </button>
               </div>
               <button style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px'}}>
@@ -1227,7 +1328,10 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             overflow: 'hidden',
           }}>
             {/* Видео на весь экран */}
-            <video src={videoIncident.video} autoPlay controls
+            <video 
+              src={videoIncident.video} 
+              autoPlay 
+              controls
               style={{
                 position: 'absolute',
                 top: 0, left: 0, width: '100vw', height: '100dvh',
@@ -1254,7 +1358,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               position: 'absolute',
               left: 0, right: 0, bottom: 0,
               height: '40dvh',
-              background: 'rgba(0,0,0,0.35)',
+              background: 'linear-gradient(to top, rgba(0, 0, 0, 0.7)  33%, rgb(0, 0, 0, 0.5) 73%, rgba(0, 0, 0, 0))',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',

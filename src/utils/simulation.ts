@@ -1,5 +1,8 @@
 import { INCIDENTS } from '../pages/map/MapPage';
-import demoVideo from '../assets/video.mp4';
+import demoVideo1 from '../assets/video-1.mp4';
+import demoVideo2 from '../assets/video-2.mp4';
+import demoVideo3 from '../assets/video-3.mp4';
+import demoVideo4 from '../assets/video-4.mp4'; 
 
 export interface SimulationPoint {
   id: number;
@@ -41,24 +44,34 @@ export const generateRandomPoint = (userPosition: [number, number]): SimulationP
   const lng = userPosition[1] + randomDistance * Math.sin(randomAngle);
 
   const randomIncident = INCIDENTS[Math.floor(Math.random() * INCIDENTS.length)];
-  const hasVideo = Math.random() > 0.7;
 
-  let image: string | undefined = undefined;
-  let video: string | undefined = undefined;
+  // Всегда добавляем изображение
+  const image = randomIncident.image || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80';
+  // Случайный выбор видео
+  const videos = [demoVideo1, demoVideo2, demoVideo3, demoVideo4];
+  const video = videos[Math.floor(Math.random() * videos.length)];
 
-  if (hasVideo) {
-    image = randomIncident.image || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=200&q=80';
-    video = demoVideo;
-  }
-
-  return {
+  const point: SimulationPoint = {
     ...randomIncident,
-    position: [lat, lng],
+    position: [lat, lng] as [number, number],
     comments: [],
     image,
     video,
     lastCommentTime: Date.now()
   };
+
+  // Планируем удаление видео через 1-2 минуты
+  const removeVideoDelay = (1 + Math.random()) * 60 * 1000; // 1-2 минуты
+  setTimeout(() => {
+    const state = getSimulationState();
+    const pointIndex = state.points.findIndex(p => p.id === point.id);
+    if (pointIndex !== -1) {
+      state.points[pointIndex].video = undefined;
+      localStorage.setItem('simulationState', JSON.stringify(state));
+    }
+  }, removeVideoDelay);
+
+  return point;
 };
 
 export const generateRandomComment = (isResponse: boolean = false): SimulationPoint['comments'][0] => {
