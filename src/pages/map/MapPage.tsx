@@ -31,6 +31,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 2,
     position: [55.7517, 37.6176],
+    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'Пожар',
     address: 'ул. Тверская, 7',
@@ -43,6 +44,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 3,
     position: [55.7601, 37.6187],
+    image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Пробка',
     address: 'ул. Новый Арбат',
@@ -55,6 +57,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 4,
     position: [55.7339, 37.5886],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Парк Горького',
     address: 'ул. Крымский Вал, 9',
@@ -67,6 +70,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 5,
     position: [55.7520, 37.5950],
+    image: 'https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Арбат',
     address: 'ул. Арбат',
@@ -91,6 +95,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 7,
     position: [55.7299, 37.6036],
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'ДТП',
     address: 'ул. Садовая',
@@ -103,6 +108,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 8,
     position: [55.7824, 37.5986],
+    image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Праздник',
     address: 'ВДНХ',
@@ -115,6 +121,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 9,
     position: [55.7033, 37.5302],
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Лужники',
     address: 'ул. Лужники, 24',
@@ -127,6 +134,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 10,
     position: [55.7652, 37.6387],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Сад Эрмитаж',
     address: 'ул. Каретный Ряд, 3',
@@ -151,6 +159,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 12,
     position: [55.7100, 37.6000],
+    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'Полиция',
     address: 'ул. Южная, 5',
@@ -163,6 +172,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 13,
     position: [55.7200, 37.6500],
+    image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Маршрут изменён',
     address: 'ул. Восточная, 8',
@@ -175,6 +185,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 14,
     position: [55.7300, 37.6700],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Открытие',
     address: 'ул. Новая, 10',
@@ -187,6 +198,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 15,
     position: [55.7400, 37.6800],
+    image: 'https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Тихо',
     address: 'ул. Западная, 12',
@@ -211,6 +223,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 17,
     position: [55.7600, 37.7000],
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'Скорая',
     address: 'ул. Медицинская, 16',
@@ -223,6 +236,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 18,
     position: [55.7700, 37.7100],
+    image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Потеряно',
     address: 'ул. Потерянная, 18',
@@ -235,6 +249,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 19,
     position: [55.7800, 37.7200],
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Найдено',
     address: 'ул. Найденная, 20',
@@ -247,6 +262,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 20,
     position: [55.7900, 37.7300],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Безопасно',
     address: 'ул. Безопасная, 22',
@@ -272,6 +288,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 22,
     position: [59.9311, 30.3609],
+    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'ДТП',
     address: 'ул. Садовая, СПб',
@@ -284,6 +301,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 23,
     position: [59.9386, 30.3141],
+    image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Пробка',
     address: 'ул. Литейный, СПб',
@@ -296,6 +314,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 24,
     position: [59.9457, 30.3896],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Парк',
     address: 'ул. Парк, СПб',
@@ -308,6 +327,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 25,
     position: [59.9500, 30.3167],
+    image: 'https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Петропавловская крепость',
     address: 'Петропавловская крепость, СПб',
@@ -332,6 +352,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 27,
     position: [59.9700, 30.3300],
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'Пожар',
     address: 'ул. Пожарная, СПб',
@@ -344,6 +365,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 28,
     position: [59.9800, 30.3400],
+    image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Праздник',
     address: 'ул. Праздничная, СПб',
@@ -356,6 +378,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 29,
     position: [59.9900, 30.3500],
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Стадион',
     address: 'ул. Спортивная, СПб',
@@ -368,6 +391,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 30,
     position: [59.9950, 30.3600],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Тихо',
     address: 'ул. Тихая, СПб',
@@ -392,6 +416,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 32,
     position: [59.9100, 30.3100],
+    image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'Полиция',
     address: 'ул. Полицейская, СПб',
@@ -404,6 +429,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 33,
     position: [59.9200, 30.3200],
+    image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Маршрут изменён',
     address: 'ул. Изменённая, СПб',
@@ -416,6 +442,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 34,
     position: [59.9300, 30.3300],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Открытие',
     address: 'ул. Новая, СПб',
@@ -428,6 +455,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 35,
     position: [59.9400, 30.3400],
+    image: 'https://images.unsplash.com/photo-1513326738677-b964603b136d?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Безопасно',
     address: 'ул. Безопасная, СПб',
@@ -452,6 +480,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 37,
     position: [59.9600, 30.3600],
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80',
     color: 'red',
     title: 'Скорая',
     address: 'ул. Медицинская, СПб',
@@ -464,6 +493,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 38,
     position: [59.9700, 30.3700],
+    image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=200&q=80',
     color: 'yellow',
     title: 'Потеряно',
     address: 'ул. Потерянная, СПб',
@@ -476,6 +506,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 39,
     position: [59.9800, 30.3800],
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=200&q=80',
     color: 'green',
     title: 'Найдено',
     address: 'ул. Найденная, СПб',
@@ -488,6 +519,7 @@ export const INCIDENTS: SimulationPoint[] = [
   {
     id: 40,
     position: [59.9900, 30.3900],
+    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=200&q=80',
     color: 'gray',
     title: 'Тестовая точка',
     address: 'ул. Тестовая, СПб',
@@ -1410,7 +1442,8 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             <video 
               src={videoIncident.video} 
               autoPlay 
-              controls
+              playsInline
+              muted
               style={{
                 position: 'absolute',
                 top: 0, left: 0, width: '100vw', height: '100dvh',
