@@ -1,10 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const LS_KEY = 'profileData';
+
+const defaultProfile = {
+  firstName: '',
+  lastName: '',
+  username: '',
+  location: '',
+  email: '',
+  mission: '',
+  avatar: '',
+};
 
 const ProfilePage: React.FC = () => {
   const [hideBroadcasts, setHideBroadcasts] = useState(false);
   const [ghostMode, setGhostMode] = useState(false);
+  const [profile, setProfile] = useState(defaultProfile);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setProfile(parsed);
+    }
+  }, []);
 
   return (
     <div style={{ minHeight: '100dvh', background: '#111', color: '#fff', fontFamily: 'inherit', paddingBottom: 100 }}>
@@ -13,18 +34,24 @@ const ProfilePage: React.FC = () => {
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 20, marginRight: 8, display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 18, letterSpacing: 0.2 }}>ИванМосква</div>
+        <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: 18, letterSpacing: 0.2 }}>{profile.username || 'Профиль'}</div>
         <button style={{ background: 'none', border: 'none', color: '#fff', fontSize: 16, fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/profile/edit')}>РЕДАКТИРОВАТЬ</button>
       </div>
       {/* Аватар и имя */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 28, marginBottom: 12 }}>
         <div style={{ width: 110, height: 110, borderRadius: '50%', background: '#3a5647', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <circle cx="40" cy="32" r="20" fill="#7fa88c" />
-            <path d="M40 52c-13 0-24 6-24 14v2h48v-2c0-8-11-14-24-14z" fill="#7fa88c" />
-          </svg>
+          {profile.avatar ? (
+            <img src={profile.avatar} alt="аватар" style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover' }} />
+          ) : (
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="32" r="20" fill="#7fa88c" />
+              <path d="M40 52c-13 0-24 6-24 14v2h48v-2c0-8-11-14-24-14z" fill="#7fa88c" />
+            </svg>
+          )}
         </div>
-        <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 8 }}>Иван Иванов</div>
+        <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 8 }}>{profile.firstName && profile.lastName ? `${profile.firstName} ${profile.lastName}` : 'Имя не указано'}</div>
+        {profile.location && <div style={{ color: '#888', fontSize: 16, marginBottom: 8 }}>{profile.location}</div>}
+        {profile.mission && <div style={{ color: '#888', fontSize: 16, marginBottom: 8, textAlign: 'center', maxWidth: 300 }}>{profile.mission}</div>}
       </div>
       {/* Статистика */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 18px auto', maxWidth: 340, background: '#181818', borderRadius: 18, overflow: 'hidden' }}>
