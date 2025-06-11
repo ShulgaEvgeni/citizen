@@ -739,7 +739,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   }, [showGoLiveModal]);
 
   // Эффект для активации камеры после получения разрешений
-  useEffect(() => {
+/*   useEffect(() => {
     if (showGoLiveModal && currentDeviceId) {
       const constraints: MediaStreamConstraints = { 
         video: { deviceId: { exact: currentDeviceId } }
@@ -761,7 +761,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
           setShowGoLiveModal(false);
         });
     }
-  }, [showGoLiveModal, currentDeviceId]);
+  }, [showGoLiveModal, currentDeviceId]); */
 
   // Функция для переключения камеры
   const handleSwitchCamera = () => {
