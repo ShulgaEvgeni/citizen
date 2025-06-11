@@ -711,7 +711,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
     if (showGoLiveModal) {
       // Сначала запрашиваем разрешение на камеру
       const constraints: MediaStreamConstraints = { 
-        video: { facingMode: { exact: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "user" : "environment" } }
+        video: { facingMode: { exact: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "environment" : "user" } }
       };
 
       console.log('constraints', constraints);
