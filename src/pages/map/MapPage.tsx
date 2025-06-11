@@ -613,7 +613,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [goLiveMarker] = useState<[number, number] | null>(null);
   const [simulationPoints, setSimulationPoints] = useState<SimulationPoint[]>([]);
   const navigate = useNavigate();
-  const [isFrontCamera, setIsFrontCamera] = useState(false);
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoIncident, setVideoIncident] = useState<SimulationPoint | null>(null);
   const [activeTab, setActiveTab] = useState<'Инцидент' | 'Событие'>('Инцидент');
