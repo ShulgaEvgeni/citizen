@@ -711,8 +711,11 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
     if (showGoLiveModal) {
       // Сначала запрашиваем разрешение на камеру
       const constraints: MediaStreamConstraints = { 
-        video: { facingMode: { exact: "environment" } }
+        video: { facingMode: { exact: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "user" : "environment" } }
       };
+
+      console.log('constraints', constraints);
+      
 
       navigator.mediaDevices?.getUserMedia(constraints)
         /* .then(stream => {
@@ -785,14 +788,14 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
     // Запускаем новый поток с новой камерой
     const constraints: MediaStreamConstraints = { 
-      video: { facingMode: { exact: !isFrontCamera ? "environment" : "user" } }
+      video: { facingMode: { exact: isFrontCamera ? "environment" : "user" } }
     };
 
     navigator.mediaDevices?.getUserMedia(constraints)
       .then(stream => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          console.log('Камера переключена:', isFrontCamera ? 'на заднюю' : 'на фронтальную');
+          console.log('Камера переключена:', !isFrontCamera ? 'на заднюю' : 'на фронтальную');
         }
         setVideoStream(stream);
       })
