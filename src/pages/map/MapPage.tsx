@@ -613,7 +613,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [goLiveMarker] = useState<[number, number] | null>(null);
   const [simulationPoints, setSimulationPoints] = useState<SimulationPoint[]>([]);
   const navigate = useNavigate();
-  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [isFrontCamera, setIsFrontCamera] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoIncident, setVideoIncident] = useState<SimulationPoint | null>(null);
   const [activeTab, setActiveTab] = useState<'Инцидент' | 'Событие'>('Инцидент');
@@ -710,7 +710,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   useEffect(() => {
     if (showGoLiveModal) {
       // Сначала запрашиваем разрешение на камеру
-      navigator.mediaDevices?.getUserMedia({ video: currentDeviceId ? { deviceId: { exact: currentDeviceId } } : { facingMode: 'environment' } })
+      navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'environment' } })
         .then(stream => {
           // Останавливаем тестовый поток
           stream.getTracks().forEach(track => track.stop());
