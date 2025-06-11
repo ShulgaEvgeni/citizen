@@ -715,13 +715,20 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
       };
 
       navigator.mediaDevices?.getUserMedia(constraints)
-        .then(stream => {
+        /* .then(stream => {
           // Останавливаем тестовый поток
           stream.getTracks().forEach(track => track.stop());
           setVideoStream(stream);
           // Теперь получаем список устройств
           return navigator.mediaDevices?.enumerateDevices();
-        })
+        }) */
+        .then(stream => {
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+            setVideoStream(stream);
+            return navigator.mediaDevices?.enumerateDevices();
+          })
         .then(devices => {
           const videos = devices?.filter(d => d.kind === 'videoinput') || [];
           console.log('videos', videos);
