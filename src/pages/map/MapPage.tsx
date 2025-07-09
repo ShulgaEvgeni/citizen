@@ -8,10 +8,9 @@ import { startSimulation, getSimulationState, addCommentToPoint } from '../../ut
 import type { SimulationPoint } from '../../utils/simulation';
 
 const DEMO_FEATURES = [
-  'Круглосуточный доступ к агенту безопасности, который может активно следить за вашей безопасностью',
-  'Экстренные службы направляются на ваше точное местоположение в случае чрезвычайной ситуации',
-  'Создание инцидентов для получения помощи от вашего сообщества',
-  'Тихий текстовый чат с агентом, когда вам нужна помощь конфиденциально',
+  '<b>Абсолютная свобода от рекламы.</b><br />Наслаждайтесь контентом в его первозданной красоте, без назойливых прерываний и отвлекающих элементов.',
+  '<b>Персональный геоконтроль.</b><br />Будьте в курсе всех значимых событий в любой точке мира! Настройте уведомления на интересующие вас локации и получайте актуальную информацию мгновенно.',
+  '<b>Уникальный стиль.</b><br />Преобразите свой профиль по собственному вкусу и подчеркните свой статус премиум-значком. Пусть все видят, что вы выбираете лучшее!',
 ];
 
 export const INCIDENTS: SimulationPoint[] = [
@@ -1537,24 +1536,24 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   // Экран с кнопкой только если разрешение не получено
   return (
     <div style={{height: '100dvh', width: '100vw', background: '#000', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'}}>
-      <div style={{marginBottom: 32, textAlign: 'center'}}>
-        <div style={{fontSize: 32, fontWeight: 700, marginBottom: 12}}>Настройка Премиум завершена</div>
-        <div style={{fontSize: 18, opacity: 0.7, marginBottom: 24}}>Ваше Премиум-членство включает:</div>
-        <ul style={{textAlign: 'left', fontSize: 18, lineHeight: 1.5, margin: '0 auto 24px auto', maxWidth: 400}}>
+      <div style={{marginBottom: 32, textAlign: 'center', padding: '0 12px'}}>
+        <div style={{fontSize: 20, fontWeight: 700, marginBottom: 12}}>Откройте для себя мир без границ с премиум-подпиской!</div>
+        <div style={{fontSize: 16, opacity: 0.7, marginBottom: 24}}>Что ждёт вас в премиум-клубе:</div>
+        <ul style={{textAlign: 'left', fontSize: 18, lineHeight: 1.5, margin: '0 auto 24px auto', maxWidth: 400, paddingLeft: 16}}>
           {DEMO_FEATURES.map((f, i) => (
-            <li key={i} style={{marginBottom: 10, listStyle: 'none'}}>
-              <span style={{color: '#1856f5', marginRight: 8}}>✔</span>{f}
+            <li key={i} style={{marginBottom: 10, listStyle: 'none', fontSize: 14, display: 'flex', flexDirection: 'row'}}>
+              <span style={{color: '#1856f5', marginRight: 8}}>✔</span> <span dangerouslySetInnerHTML={{__html: f}} />
             </li>
           ))}
         </ul>
-        <div style={{fontSize: 16, opacity: 0.7, marginBottom: 24}}>
-          Узнайте, каково это - быть подключенным к вашему агенту безопасности
+        <div style={{fontSize: 12, opacity: 0.7, marginBottom: 24}}>
+          Станьте частью элитарного сообщества уже сегодня. Ваш комфорт — наш приоритет!
         </div>
         <button
-          style={{background: '#1856f5', color: '#fff', fontSize: 20, border: 'none', borderRadius: 32, padding: '16px 32px', width: 320, maxWidth: '90vw', fontWeight: 700, cursor: 'pointer'}}
+          style={{background: '#1856f5', color: '#fff', fontSize: 16, border: 'none', borderRadius: 32, padding: '16px 32px', width: 320, maxWidth: '90vw', fontWeight: 700, cursor: 'pointer'}}
           onClick={handleShowLocation}
         >
-          Показать мое местоположение
+          Присоединиться!
         </button>
         {error && <div style={{color: 'red', marginTop: 16}}>{error}</div>}
       </div>

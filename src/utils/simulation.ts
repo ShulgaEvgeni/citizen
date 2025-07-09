@@ -151,7 +151,7 @@ export const startSimulation = (userPosition: [number, number]) => {
   
   localStorage.setItem('simulationState', JSON.stringify(initialState));
   
-  // Создаем первую точку через 20 секунд
+  // Создаем первую точку через 8 секунд
   setTimeout(() => {
     const state = getSimulationState();
     if (state.isRunning) {
@@ -162,7 +162,7 @@ export const startSimulation = (userPosition: [number, number]) => {
       // Запускаем отдельный интервал для комментариев этой точки
       startCommentsForPoint(newPoint.id);
     }
-  }, 20000); // 20 секунд
+  }, 8000); // 8 секунд
 
   // Запускаем интервал для создания последующих точек
   const pointsInterval = setInterval(() => {
