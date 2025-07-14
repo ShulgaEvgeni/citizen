@@ -30,8 +30,7 @@ const SplashScreen: React.FC = () => (
 const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [showRealMap, setShowRealMap] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false); 
 
   const handleOpenGoLive = () => {
     // Сначала проверяем доступ к камере
@@ -84,7 +83,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<MapPage onShowRealMapChange={setShowRealMap} onOpenGoLive={handleOpenGoLive} />} />
+        <Route path="/" element={<MapPage   onOpenGoLive={handleOpenGoLive} />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
@@ -93,7 +92,6 @@ const AppContent: React.FC = () => {
         <Route path="/profile/edit" element={<EditProfilePage />} />
       </Routes>
       
-      {showRealMap && (
         <div className={styles.bottomNav}>
           <Link to="/" className={styles.bottomNavIcon} aria-label="Главная">
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -132,7 +130,7 @@ const AppContent: React.FC = () => {
             </svg>
           </Link>
         </div>
-      )}
+     
       <SubscriptionModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

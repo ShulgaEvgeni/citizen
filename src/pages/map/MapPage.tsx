@@ -589,11 +589,9 @@ function getUserLocationIcon() {
 }
 
 const MapPage: React.FC<{ 
-  onShowRealMapChange?: (show: boolean) => void;
+   
   onOpenGoLive?: () => void;
-}> = ({ onShowRealMapChange, onOpenGoLive }) => {
-  const [showRealMap, setShowRealMap] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+}> = ({   onOpenGoLive }) => { 
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [activeIncident, setActiveIncident] = useState<SimulationPoint | null>(null);
   // const [showLocationModal, setShowLocationModal] = useState(false);
@@ -619,6 +617,8 @@ const MapPage: React.FC<{
   const [activeTab, setActiveTab] = useState<'Инцидент' | 'Событие'>('Инцидент');
   const [subscriptions, setSubscriptions] = useState<Set<number>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [hidePremiumButton, setHidePremiumButton] = useState(false);
 
   // Функция для обновления состояния из localStorage
   const updateStateFromStorage = useCallback(() => {
@@ -661,12 +661,9 @@ const MapPage: React.FC<{
   }, [updateStateFromStorage]);
 
   // Сначала показываем карту, затем проверяем разрешение на геолокацию
-  useEffect(() => {
-    // Сразу показываем карту
-    setShowRealMap(true);
-    onShowRealMapChange?.(true);
+  useEffect(() => { 
     
-    // Затем проверяем разрешение на геолокацию
+    // Проверяем только если разрешение уже дано
     if (!navigator.permissions || !navigator.geolocation) {
       console.log('Geolocation not supported');
       return;
@@ -681,32 +678,11 @@ const MapPage: React.FC<{
           },
           (e) => {
             console.log('Error getting position:', e);
-            setShowRealMap(false);
-            onShowRealMapChange?.(false);
-            setError('Location permission denied.');
-          }
-        );
-      } else if (result.state === 'denied') {
-        // Если разрешение отклонено, скрываем карту
-        setShowRealMap(false);
-        onShowRealMapChange?.(false);
-        setError('Location permission denied.');
-      } else {
-        // Если разрешение не определено, запрашиваем его
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            setPosition([pos.coords.latitude, pos.coords.longitude]);
-          },
-          (e) => {
-            console.log('Error getting position:', e);
-            setShowRealMap(false);
-            onShowRealMapChange?.(false);
-            setError('Location permission denied.');
           }
         );
       }
     });
-  }, [onShowRealMapChange]);
+  }, []);
 
   useEffect(() => {
     if (search.trim() === '') {
@@ -720,24 +696,17 @@ const MapPage: React.FC<{
   }, [search]);
 
   const handleShowLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser.');
+    if (!navigator.geolocation) { 
       return;
     }
-    
-    // Показываем карту сразу
-    setShowRealMap(true);
-    onShowRealMapChange?.(true);
+     
     
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setPosition([pos.coords.latitude, pos.coords.longitude]);
       },
       (e) => {
-        console.log('Error getting position:', e);
-        setShowRealMap(false);
-        onShowRealMapChange?.(false);
-        setError('Location permission denied.');
+        console.log('Error getting position:', e);  
       }
     );
   };
@@ -1011,7 +980,6 @@ const MapPage: React.FC<{
     }
   };
 
-  if (showRealMap) {
     return (
       <div className={styles.mapContainer}>
         {/* Модалка поиска */}
@@ -1077,7 +1045,7 @@ const MapPage: React.FC<{
             </svg>
           </button>
         </div>
-        <MapContainer zoomControl={false} center={(flyTo || position) as [number, number]} zoom={16} className={styles.mapWrapper}>
+        <MapContainer zoomControl={true} center={(flyTo || position || [55.7558, 37.6173]) as [number, number]} zoom={16} className={styles.mapWrapper}>
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a>"
@@ -1262,89 +1230,6 @@ const MapPage: React.FC<{
           </div>
           </>
         )}
-        {/* Модалка местоположения */}
-        {/* showLocationModal && (
-          <div className={styles.locationModal}>
-            <div className={styles.locationModalContent}>
-              <div className={styles.locationModalHeader}>
-                <div>
-                  <div style={{fontSize: 15, color: '#aaa', marginBottom: 4}}>0.4 км · Центр</div>
-                  <div style={{fontSize: 24, fontWeight: 700, marginBottom: 8}}>Ваше местоположение</div>
-                </div>
-                <button 
-                  onClick={() => setShowLocationModal(false)}
-                  className={styles.locationModalClose}
-                >
-                  &times;
-                </button>
-              </div>
-              
-              <div className={styles.locationModalInfo}>
-                <div className={styles.locationModalImage}>
-                   Здесь можно добавить мини-карту или изображение локации 
-                </div>
-                <div style={{flex: 1}}>
-                  <div style={{fontSize: 16, marginBottom: 8}}>11 оповещений за последние 24 часа</div>
-                  <button 
-                    className={styles.locationModalButton}
-                    onClick={() => {
-                      setShowLocationModal(false);
-                      setShowGoLiveModal(true);
-                    }}
-                  >
-                    <span style={{display: 'flex', alignItems: 'center'}}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="4"/>
-                        <circle cx="12" cy="12" r="10"/>
-                      </svg>
-                    </span>
-                    Начать трансляцию
-                  </button>
-                </div>
-              </div>
-
-              <div className={styles.locationModalActions}>
-                <button className={styles.locationModalAction}>
-                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                  </svg>
-                  0
-                </button>
-                <button 
-                  onClick={() => toggleSubscription(99999)} // ID для местоположения
-                  className={styles.locationModalAction}
-                >
-                  {isSubscribed(99999) ? (
-                    <>
-                      <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9 12l2 2 4-4"/>
-                      </svg>
-                      Подписан
-                    </>
-                  ) : (
-                    <>
-                      <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 8v8M8 12h8"/>
-                      </svg>
-                      Подписаться
-                    </>
-                  )}
-                </button>
-                <button 
-                  onClick={() => handleShare()}
-                  className={styles.locationModalAction}
-                >
-                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M4 12h16M14 6l6 6-6 6"/>
-                  </svg>
-                  Поделиться
-                </button>
-              </div>
-            </div>
-          </div>
-        ) */}
 
         {/* Полноэкранная модалка Go Live */}
         {showGoLiveModal && cameraAllowed !== false && (
@@ -1456,36 +1341,69 @@ const MapPage: React.FC<{
             </div>
           </div>
         )}
+
+        {/* Кнопка премиум внизу слева */}
+        {!hidePremiumButton && (
+          <div className={styles.premiumButton}>
+            <button
+              className={styles.premiumButtonInner}
+              onClick={() => setShowPremiumModal(true)}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9L8.91 8.26L12 2Z" fill="#fff"/>
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Кнопка геопозиции внизу справа */}
+        <div className={styles.locationButton}>
+          <button
+            className={styles.locationButtonInner}
+            onClick={handleShowLocation}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#fff"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Модалка премиум */}
+        {showPremiumModal && (
+          <div className={styles.premiumModal}>
+            <div className={styles.premiumModalContent}>
+                <button onClick={() => setShowPremiumModal(false)} className={styles.premiumModalClose}>&times;</button>
+              <div className={styles.premiumModalHeader}>
+                <div className={styles.premiumModalTitle}>Откройте для себя мир без границ с премиум-подпиской!</div>
+              </div>
+              <div className={styles.premiumModalSubtitle}>Что ждёт вас в премиум-клубе:</div>
+              <ul className={styles.premiumModalFeatures}>
+                {DEMO_FEATURES.map((f, i) => (
+                  <li key={i} className={styles.premiumModalFeature}>
+                    <span className={styles.premiumModalFeatureIcon}>✔</span> <span dangerouslySetInnerHTML={{__html: f}} />
+                  </li>
+                ))}
+              </ul>
+              <div className={styles.premiumModalDescription}>
+                Станьте частью элитарного сообщества уже сегодня. Ваш комфорт — наш приоритет!
+              </div>
+              <button
+                className={styles.premiumModalButton}
+                onClick={() => {
+                  setShowPremiumModal(false);
+                  setHidePremiumButton(true);
+                }}
+              >
+                Присоединиться!
+              </button>
+              {/* {error && <div className={styles.premiumModalError}>{error}</div>} */}
+            </div>
+          </div>
+        )}
       </div>
     );
-  }
 
-  // Экран с кнопкой только если разрешение не получено
-  return (
-    <div className={styles.initialScreen}>
-      <div className={styles.initialContent}>
-        <div className={styles.initialTitle}>Откройте для себя мир без границ с премиум-подпиской!</div>
-        <div className={styles.initialSubtitle}>Что ждёт вас в премиум-клубе:</div>
-        <ul className={styles.initialFeatures}>
-          {DEMO_FEATURES.map((f, i) => (
-            <li key={i} className={styles.initialFeature}>
-              <span className={styles.initialFeatureIcon}>✔</span> <span dangerouslySetInnerHTML={{__html: f}} />
-            </li>
-          ))}
-        </ul>
-        <div className={styles.initialDescription}>
-          Станьте частью элитарного сообщества уже сегодня. Ваш комфорт — наш приоритет!
-        </div>
-        <button
-          className={styles.initialButton}
-          onClick={handleShowLocation}
-        >
-          Присоединиться!
-        </button>
-        {error && <div className={styles.initialError}>{error}</div>}
-      </div>
-    </div>
-  );
+  
 };
 
 export default MapPage; 
