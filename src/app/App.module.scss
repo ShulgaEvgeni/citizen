@@ -40,7 +40,6 @@
   align-items: center;
   z-index: 1100;
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.25);
-  max-width: 480px;
   margin: 0 auto;
   padding: 0 32px 0 32px;
 }
@@ -75,9 +74,9 @@
 .bottomNavCircle {
   width: 72px;
   height: 72px;
-  background: radial-gradient(circle, #1856f5 60%, #0a1a3a 100%);
+  background: radial-gradient(circle, #e53935 60%, #0a1a3a 100%);
   border-radius: 50%;
-  box-shadow: 0 0 24px 0 #1856f5;
+  box-shadow: 0 0 24px 0 #e53935;
   display: flex;
   align-items: center;
   justify-content: center;

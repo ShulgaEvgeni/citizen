@@ -548,7 +548,7 @@ function getIncidentIcon(image?: string, color?: string) {
     if (color === 'green') border = '#43a047';
     if (color === 'gray') border = '#888';
     return L.divIcon({
-      className: 'incident-marker-img',
+      className: styles.incidentMarkerImg,
       html: `<div style="width:54px;height:74px;display:flex;align-items:center;justify-content:center;background:none;"><div style='width:54px;height:74px;background:rgba(0,0,0,0.0);display:flex;align-items:center;justify-content:center;'><img src='${image}' style='width:54px;height:74px;object-fit:cover;border-radius:16px;border:3px solid ${border};box-shadow:0 2px 8px rgba(0,0,0,0.18);background:#222;'/></div></div>`,
       iconSize: [54, 74],
       iconAnchor: [27, 74],
@@ -562,7 +562,7 @@ function getIncidentIcon(image?: string, color?: string) {
     if (color === 'green') bg = '#43a047';
     if (color === 'gray') bg = '#888';
     return L.divIcon({
-      className: 'incident-marker-dot',
+      className: styles.incidentMarkerDot,
       html: `<div style='width:28px;height:28px;border-radius:50%;background:${bg};box-shadow:0 2px 8px rgba(0,0,0,0.18);'></div>` ,
       iconSize: [28, 28],
       iconAnchor: [14, 28],
@@ -574,7 +574,7 @@ function getIncidentIcon(image?: string, color?: string) {
 // Кастомная иконка местоположения пользователя
 function getUserLocationIcon() {
   return L.divIcon({
-    className: 'user-location-icon',
+    className: styles.userLocationIcon,
     html: `
       <svg width="28" height="28" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="28" cy="28" r="28" fill="#7fa88c"/>
@@ -588,20 +588,21 @@ function getUserLocationIcon() {
   });
 }
 
-const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ onShowRealMapChange }) => {
-  const [showRealMap, setShowRealMap] = useState(false);
+const MapPage: React.FC<{ 
+  onShowRealMapChange?: (show: boolean) => void;
+  onOpenGoLive?: () => void;
+}> = ({ onShowRealMapChange, onOpenGoLive }) => {
+  const [showRealMap, setShowRealMap] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [activeIncident, setActiveIncident] = useState<SimulationPoint | null>(null);
-  const [showLocationModal, setShowLocationModal] = useState(false);
+  // const [showLocationModal, setShowLocationModal] = useState(false);
   const [showGoLiveModal, setShowGoLiveModal] = useState(false);
   const [cameraAllowed, setCameraAllowed] = useState<boolean | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const [currentDeviceId, setCurrentDeviceId] = useState<string | null>(null);
-  const [hoverLeft, setHoverLeft] = useState(false);
-  const [hoverRight, setHoverRight] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState(INCIDENTS);
@@ -616,6 +617,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoIncident, setVideoIncident] = useState<SimulationPoint | null>(null);
   const [activeTab, setActiveTab] = useState<'Инцидент' | 'Событие'>('Инцидент');
+  const [subscriptions, setSubscriptions] = useState<Set<number>>(new Set());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Функция для обновления состояния из localStorage
@@ -658,20 +660,49 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [updateStateFromStorage]);
 
-  // Проверяем разрешение на геолокацию при монтировании
+  // Сначала показываем карту, затем проверяем разрешение на геолокацию
   useEffect(() => {
-    if (!navigator.permissions || !navigator.geolocation) return;
+    // Сразу показываем карту
+    setShowRealMap(true);
+    onShowRealMapChange?.(true);
+    
+    // Затем проверяем разрешение на геолокацию
+    if (!navigator.permissions || !navigator.geolocation) {
+      console.log('Geolocation not supported');
+      return;
+    }
+    
     navigator.permissions.query({ name: 'geolocation' as PermissionName }).then((result) => {
       if (result.state === 'granted') {
+        // Если разрешение уже дано, получаем позицию
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             setPosition([pos.coords.latitude, pos.coords.longitude]);
-            setShowRealMap(true);
-            onShowRealMapChange?.(true);
           },
           (e) => {
-            console.log(e);
-            setError('Location permission denied.')}
+            console.log('Error getting position:', e);
+            setShowRealMap(false);
+            onShowRealMapChange?.(false);
+            setError('Location permission denied.');
+          }
+        );
+      } else if (result.state === 'denied') {
+        // Если разрешение отклонено, скрываем карту
+        setShowRealMap(false);
+        onShowRealMapChange?.(false);
+        setError('Location permission denied.');
+      } else {
+        // Если разрешение не определено, запрашиваем его
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setPosition([pos.coords.latitude, pos.coords.longitude]);
+          },
+          (e) => {
+            console.log('Error getting position:', e);
+            setShowRealMap(false);
+            onShowRealMapChange?.(false);
+            setError('Location permission denied.');
+          }
         );
       }
     });
@@ -693,16 +724,22 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
       setError('Geolocation is not supported by your browser.');
       return;
     }
+    
+    // Показываем карту сразу
+    setShowRealMap(true);
+    onShowRealMapChange?.(true);
+    
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setPosition([pos.coords.latitude, pos.coords.longitude]);
       },
       (e) => {
-        console.log(e);
-        setError('Location permission denied.')}
+        console.log('Error getting position:', e);
+        setShowRealMap(false);
+        onShowRealMapChange?.(false);
+        setError('Location permission denied.');
+      }
     );
-    setShowRealMap(true);
-    onShowRealMapChange?.(true);
   };
 
   // Запрос разрешения на камеру при открытии Go Live
@@ -894,42 +931,122 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
     }
   }, [simulationPoints, showVideoModal, videoIncident]);
 
+  // Слушаем вызовы функции onOpenGoLive извне
+  useEffect(() => {
+    if (onOpenGoLive) {
+      const handleOpenGoLive = () => {
+        setShowGoLiveModal(true);
+      };
+      
+      // Добавляем обработчик к window для глобального доступа
+      (window as Window & { openGoLiveModal?: () => void }).openGoLiveModal = handleOpenGoLive;
+      
+      return () => {
+        delete (window as Window & { openGoLiveModal?: () => void }).openGoLiveModal;
+      };
+    }
+  }, [onOpenGoLive]);
+
+  // Инициализация подписок из localStorage
+  useEffect(() => {
+    const savedSubscriptions = localStorage.getItem('subscriptions');
+    if (savedSubscriptions) {
+      try {
+        const subscriptionIds = JSON.parse(savedSubscriptions) as number[];
+        // Фильтруем только существующие ID
+        const validIds = subscriptionIds.filter(id => 
+          INCIDENTS.some(incident => incident.id === id) ||
+          simulationPoints.some(point => point.id === id)
+        );
+        setSubscriptions(new Set(validIds));
+        // Сохраняем обратно только валидные ID
+        localStorage.setItem('subscriptions', JSON.stringify(validIds));
+      } catch (error) {
+        console.error('Ошибка при загрузке подписок:', error);
+        localStorage.removeItem('subscriptions');
+      }
+    }
+  }, [simulationPoints]);
+
+  // Функция для переключения подписки
+  const toggleSubscription = (incidentId: number) => {
+    const newSubscriptions = new Set(subscriptions);
+    if (newSubscriptions.has(incidentId)) {
+      newSubscriptions.delete(incidentId);
+    } else {
+      newSubscriptions.add(incidentId);
+    }
+    setSubscriptions(newSubscriptions);
+    localStorage.setItem('subscriptions', JSON.stringify(Array.from(newSubscriptions)));
+  };
+
+  // Функция для проверки подписки
+  const isSubscribed = (incidentId: number) => {
+    return subscriptions.has(incidentId);
+  };
+
+  // Функция для поделиться
+  const handleShare = async (incident?: SimulationPoint) => {
+    const shareData = {
+      title: 'CITIZEN - Безопасность в реальном времени',
+      text: incident 
+        ? `Событие: ${incident.title} - ${incident.address}` 
+        : 'Откройте для себя мир без границ с премиум-подпиской!',
+      url: window.location.origin + window.location.pathname
+    };
+
+    try {
+      if (navigator.share) {
+        // Используем Web Share API если доступен
+        await navigator.share(shareData);
+      } else {
+        // Fallback: копируем ссылку в буфер обмена
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Ссылка скопирована в буфер обмена!');
+      }
+    } catch (error) {
+      console.error('Ошибка при попытке поделиться:', error);
+      // Fallback: показываем ссылку в alert
+      alert(`Ссылка на приложение: ${shareData.url}`);
+    }
+  };
+
   if (showRealMap) {
     return (
-      <div style={{height: '100dvh', width: '100vw', position: 'relative', paddingBottom: 90}}>
+      <div className={styles.mapContainer}>
         {/* Модалка поиска */}
         {searchOpen && (
-          <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.98)', zIndex: 2001, display: 'flex', flexDirection: 'column'}}>
-            <div style={{display: 'flex', alignItems: 'center', padding: '24px 16px 12px 16px'}}>
-              <button onClick={() => setSearchOpen(false)} style={{width: 40, height: 40, borderRadius: '50%', background: 'rgba(60,60,60,0.95)', border: 'none', marginRight: 12, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div className={styles.searchModal}>
+            <div className={styles.searchHeader}>
+              <button onClick={() => setSearchOpen(false)} className={styles.searchBackButton}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M15 19l-7-7 7-7"/></svg>
               </button>
-              <div style={{flex: 1, position: 'relative', display: 'flex', alignItems: 'center'}}>
+              <div className={styles.searchInputContainer}>
                 <input
                   autoFocus
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Поиск места..."
-                  style={{flex: 1, width: '100%', background: '#222', color: '#fff', border: 'none', borderRadius: 24, fontSize: 20, padding: '12px 44px 12px 44px', outline: 'none'}}
+                  className={styles.searchInput}
                 />
-                <span style={{position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)'}}>
+                <span className={styles.searchIcon}>
                   <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#fff" strokeWidth="2"><circle cx="10" cy="10" r="7"/><path d="M20 20l-4-4"/></svg>
                 </span>
                 {search && (
-                  <button onClick={()=>setSearch('')} style={{position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer'}}>&times;</button>
+                  <button onClick={()=>setSearch('')} className={styles.searchClearButton}>&times;</button>
                 )}
               </div>
             </div>
-            <div style={{flex: 1, overflowY: 'auto', padding: '0 0 16px 0'}}>
-              {searchResult.length === 0 && <div style={{color: '#aaa', textAlign: 'center', marginTop: 32, fontSize: 18}}>Ничего не найдено</div>}
+            <div className={styles.searchResults}>
+              {searchResult.length === 0 && <div className={styles.noResults}>Ничего не найдено</div>}
               {searchResult.map(item => (
-                <div key={item.id} onClick={() => { setFlyTo(item.position as [number, number]); setSearchOpen(false); }} style={{display: 'flex', alignItems: 'center', padding: '18px 20px', cursor: 'pointer', borderBottom: '1px solid #222'}}>
-                  <div style={{width: 44, height: 44, borderRadius: '50%', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 16}}>
+                <div key={item.id} onClick={() => { setFlyTo(item.position as [number, number]); setSearchOpen(false); }} className={styles.searchResultItem}>
+                  <div className={styles.searchResultIcon}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
                   </div>
-                  <div style={{flex: 1}}>
-                    <div style={{color: '#fff', fontSize: 18, fontWeight: 600}}>{item.title}</div>
-                    <div style={{color: '#aaa', fontSize: 15}}>{item.address}</div>
+                  <div className={styles.searchResultContent}>
+                    <div className={styles.searchResultTitle}>{item.title}</div>
+                    <div className={styles.searchResultAddress}>{item.address}</div>
                   </div>
                 </div>
               ))}
@@ -937,23 +1054,9 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
           </div>
         )}
         {/* Верхние кнопки поверх карты */}
-        <div style={{position: 'fixed', top: 16, left: 16, zIndex: 1101}}>
+        <div className={styles.topLeftButton}>
           <button
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: '50%',
-              background: hoverLeft ? 'rgba(60,60,60,0.95)' : 'rgba(30,30,30,0.85)',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-              cursor: 'pointer',
-              transition: 'background 0.18s'
-            }}
-            onMouseEnter={() => setHoverLeft(true)}
-            onMouseLeave={() => setHoverLeft(false)}
+            className={styles.topButton}
             onClick={() => navigate('/profile')}
           >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -963,23 +1066,9 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             </svg>
           </button>
         </div>
-        <div style={{position: 'fixed', top: 16, right: 16, zIndex: 1101}}>
+        <div className={styles.topRightButton}>
           <button
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: '50%',
-              background: hoverRight ? 'rgba(60,60,60,0.95)' : 'rgba(30,30,30,0.85)',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-              cursor: 'pointer',
-              transition: 'background 0.18s'
-            }}
-            onMouseEnter={() => setHoverRight(true)}
-            onMouseLeave={() => setHoverRight(false)}
+            className={styles.topButton}
             onClick={() => setSearchOpen(true)}
           >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -988,7 +1077,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             </svg>
           </button>
         </div>
-        <MapContainer center={(flyTo || position) as [number, number]} zoom={16} style={{height: '100dvh', width: '100vw', paddingBottom: 90}}>
+        <MapContainer zoomControl={false} center={(flyTo || position) as [number, number]} zoom={16} className={styles.mapWrapper}>
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a>"
@@ -997,7 +1086,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
             <Marker 
               position={position as [number, number]} 
               icon={getUserLocationIcon()}
-              eventHandlers={{ click: () => setShowLocationModal(true) }}
+              // eventHandlers={{ click: () => setShowLocationModal(true) }}
             >
               <Popup className={styles.popup}   closeButton={false} autoPan={false}  >
                 <div style={{
@@ -1054,92 +1143,36 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               }) }}
             /> 
           )}
-        </MapContainer>
-        <div style={{
-          position: 'fixed',
-          top: 16,
-          right: 16,
-          width: 90,
-          height: 90,
-          background: 'rgba(30,30,30,0.7)',
-          borderRadius: 16,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1100,
-        }}>
-          {/* Camera preview */}
-          {/* {cameraStream ? (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              style={{width: 70, height: 50, borderRadius: 8, marginBottom: 8, objectFit: 'cover', background: '#222'}}
-            />
-          ) : (
-            <div style={{width: 70, height: 50, background: '#222', borderRadius: 8, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: 12}}>
-              Camera
-            </div>
-          )}
-          <div style={{display: 'flex', gap: 8}}>
-            <span style={{width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M21 5H7a4 4 0 0 0 0 8h1"/><path d="M7 23l-4-4 4-4"/><path d="M3 19h14a4 4 0 0 0 0-8h-1"/></svg>
-            </span>
-            <span style={{width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/></svg>
-            </span>
-          </div> */}
-        </div>
-        {/*
-        <div style={{position: 'fixed', left: 0, bottom: 0, width: '100vw', background: 'rgba(0,0,0,0.95)', padding: '16px 8px 24px 8px', display: 'flex', gap: 8, zIndex: 1000}}>
-          <input
-            ref={inputRef}
-            type="text"
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            placeholder="Message Agent..."
-            style={{flex: 1, borderRadius: 24, border: 'none', padding: '12px 16px', fontSize: 16, outline: 'none'}}
-            onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
-          />
-          <button
-            onClick={handleSend}
-            style={{background: '#1856f5', color: '#fff', border: 'none', borderRadius: 24, padding: '0 24px', fontSize: 16, fontWeight: 700, cursor: 'pointer'}}
-          >
-            Send
-          </button>
-        </div>
-        */}
+        </MapContainer>      
         {activeIncident && (
           <>
             {showComments && (
-              <div style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.98)', zIndex: 3000, display: 'flex', flexDirection: 'column'}}>
-                <div style={{display: 'flex', alignItems: 'center', padding: '20px 16px 12px 16px'}}>
-                  <button onClick={() => setShowComments(false)} style={{width: 40, height: 40, borderRadius: '50%', background: 'rgba(60,60,60,0.95)', border: 'none', marginRight: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 24}}>&larr;</button>
-                  <div style={{fontSize: 20, fontWeight: 700, color: '#fff'}}>Чат · {activeIncident.comments?.length || 0}</div>
+              <div className={styles.chatModal}>
+                <div className={styles.chatModalHeader}>
+                  <button onClick={() => setShowComments(false)} className={styles.chatModalBackButton}>&larr;</button>
+                  <div className={styles.chatModalTitle}>Чат · {activeIncident.comments?.length || 0}</div>
                 </div>
-                <div style={{flex: 1, overflowY: 'auto', padding: '0 0 12px 0'}}>
+                <div className={styles.chatModalMessages}>
                   {activeIncident.comments?.map((c: SimulationPoint['comments'][0]) => (
-                    <div key={c.id} style={{padding: '12px 20px', display: 'flex', alignItems: 'flex-start', gap: 12}}>
-                      <div style={{width: 36, height: 36, borderRadius: '50%', background: '#222', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18}}>{c.user[0]}</div>
-                      <div style={{flex: 1}}>
-                        <div style={{color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 2}}>{c.user}</div>
-                        {c.text && <div style={{color: '#fff', fontSize: 16, marginBottom: c.image ? 8 : 0}}>{c.text}</div>}
-                        {c.image && <img src={c.image} alt="комментарий" style={{maxWidth: 180, borderRadius: 12, marginBottom: 4}} />}
-                        <div style={{color: '#aaa', fontSize: 13}}>{c.time}</div>
+                    <div key={c.id} className={styles.chatMessage}>
+                      <div className={styles.chatMessageAvatar}>{c.user[0]}</div>
+                      <div className={styles.chatMessageContent}>
+                        <div className={styles.chatMessageUser}>{c.user}</div>
+                        {c.text && <div className={styles.chatMessageText}>{c.text}</div>}
+                        {c.image && <img src={c.image} alt="комментарий" className={styles.chatMessageImage} />}
+                        <div className={styles.chatMessageTime}>{c.time}</div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div style={{padding: '8px 12px 18px 12px', background: 'linear-gradient(to top, rgba(0,0,0,0.35), rgba(0,0,0,0.05))', display: 'flex', alignItems: 'center', gap: 8}}>
+                <div className={styles.chatInputContainer}>
                   <input
                     value={commentText}
                     onChange={e => setCommentText(e.target.value)}
                     placeholder="Написать комментарий..."
-                    style={{flex: 1, borderRadius: 24, border: 'none', background: '#222', color: '#fff', fontSize: 17, padding: '12px 16px', outline: 'none'}}
+                    className={styles.chatInput}
                   />
-                  <input type="file" accept="image/*" style={{display: 'none'}} id="comment-image-upload" onChange={e => {
+                  <input type="file" accept="image/*" className={styles.chatImageUpload} id="comment-image-upload" onChange={e => {
                     const file = e.target.files?.[0];
                     if (file) {
                       const reader = new FileReader();
@@ -1147,7 +1180,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                       reader.readAsDataURL(file);
                     }
                   }} />
-                  <label htmlFor="comment-image-upload" style={{cursor: 'pointer', color: '#fff', fontSize: 22, padding: '0 8px'}}>
+                  <label htmlFor="comment-image-upload" className={styles.chatImageUploadLabel}>
                     <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 17l2-2a2 2 0 0 1 2.8 0l2 2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
                   </label>
                   <button
@@ -1165,122 +1198,95 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                         setCommentImage(null);
                       }
                     }}
-                    style={{background: '#1856f5', color: '#fff', border: 'none', borderRadius: 24, fontWeight: 700, fontSize: 17, padding: '10px 18px', marginLeft: 4, cursor: 'pointer'}}
+                    className={styles.chatSendButton}
                   >Отправить</button>
                 </div>
               </div>
             )}
-          <div style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: '#181818',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            boxShadow: '0 -2px 24px rgba(0,0,0,0.25)',
-            zIndex: 2000,
-            padding: 0,
-            maxWidth: 480,
-            margin: '0 auto',
-            width: '100vw',
-            color: '#fff',
-              display: showComments ? 'none' : 'flex',
-            flexDirection: 'column',
-            transition: 'transform 0.2s',
-              marginBottom: 87,
-              paddingBottom: 15,
-            }}>
-              <div style={{padding: '20px 16px 0 16px'}}>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8}}>
-                  <div style={{fontSize: 28, fontWeight: 700, lineHeight: 1.1}}>{activeIncident.title}</div>
-                  <button onClick={() => setActiveIncident(null)} style={{background: 'none', border: 'none', color: '#fff', fontSize: 28, cursor: 'pointer', marginLeft: 8}}>&times;</button>
-                </div>
-                <div style={{color: '#ffd700', fontSize: 15, fontWeight: 600, marginBottom: 2}}>{activeIncident.address}</div>
-                <div style={{display: 'flex', alignItems: 'flex-start', gap: 16, marginTop: 10}}>
-                  <div style={{flex: 1}}>
-                    <div style={{color: '#fff', fontSize: 16, marginBottom: 8}}>{activeIncident.description}</div>
-                    <div style={{color: '#aaa', fontSize: 14, marginBottom: 8}}>
-                      Обновлено {activeIncident.updated} · {activeIncident.views} просмотров
-                    </div>
-                  </div>
-                  <div style={{width: 90, height: 90, borderRadius: 16, overflow: 'hidden', background: '#222', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <img src={activeIncident.image} alt="incident" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                  </div>
-                </div>
+          <div className={styles.incidentModal} style={{display: showComments ? 'none' : 'flex'}}>
+            <div className={styles.incidentModalContent}>
+              <div className={styles.incidentModalHeader}>
+                <div className={styles.incidentModalTitle}>{activeIncident.title}</div>
+                <button onClick={() => setActiveIncident(null)} className={styles.incidentModalClose}>&times;</button>
               </div>
-              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 0, padding: '0 16px 8px 16px', marginTop: 18}}>
-                <button onClick={() => setShowComments(true)} style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'flex-start'}}>
-                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  {activeIncident.comments?.length}
-                </button>
-                <button style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'center'}}>
-                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-                  Подписаться
-                </button>
-                <button style={{background: 'none', border: 'none', color: '#fff', fontWeight: 600, fontSize: 17, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', flex: 1, justifyContent: 'flex-end'}}>
-                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
-                  Поделиться
-                </button>
+              <div className={styles.incidentModalAddress}>{activeIncident.address}</div>
+              <div className={styles.incidentModalBody}>
+                <div className={styles.incidentModalDescription}>
+                  <div className={styles.incidentModalText}>{activeIncident.description}</div>
+                  <div className={styles.incidentModalMeta}>
+                    Обновлено {activeIncident.updated} · {activeIncident.views} просмотров
+                  </div>
+                </div>
+                <div className={styles.incidentModalImage}>
+                  <img src={activeIncident.image} alt="incident" />
+                </div>
               </div>
             </div>
+            <div className={styles.incidentModalActions}>
+              <button onClick={() => setShowComments(true)} className={styles.incidentModalAction}>
+                <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                {activeIncident.comments?.length}
+              </button>
+              <button 
+                onClick={() => toggleSubscription(activeIncident.id)}
+                className={styles.incidentModalAction}
+              >
+                {isSubscribed(activeIncident.id) ? (
+                  <>
+                    <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                    Подписан
+                  </>
+                ) : (
+                  <>
+                    <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 8v8M8 12h8"/>
+                    </svg>
+                    Подписаться
+                  </>
+                )}
+              </button>
+              <button 
+                onClick={() => handleShare(activeIncident)}
+                className={styles.incidentModalAction}
+              >
+                <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M4 12h16M14 6l6 6-6 6"/>
+                </svg>
+                Поделиться
+              </button>
+            </div>
+          </div>
           </>
         )}
         {/* Модалка местоположения */}
-        {showLocationModal && (
-          <div style={{
-            position: 'fixed',
-            left: '50%',
-            bottom: 87,
-            transform: 'translateX(-50%)',
-            width: '100vw',
-            maxWidth: '544px',
-            background: '#181818',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            boxShadow: '0 -2px 24px rgba(0,0,0,0.25)',
-            zIndex: 2000,
-            color: '#fff',
-          }}>
-            <div style={{padding: '20px 16px'}}>
-              <div style={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16}}>
+        {/* showLocationModal && (
+          <div className={styles.locationModal}>
+            <div className={styles.locationModalContent}>
+              <div className={styles.locationModalHeader}>
                 <div>
                   <div style={{fontSize: 15, color: '#aaa', marginBottom: 4}}>0.4 км · Центр</div>
                   <div style={{fontSize: 24, fontWeight: 700, marginBottom: 8}}>Ваше местоположение</div>
                 </div>
                 <button 
                   onClick={() => setShowLocationModal(false)}
-                  style={{background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer'}}
+                  className={styles.locationModalClose}
                 >
                   &times;
                 </button>
               </div>
               
-              <div style={{display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16}}>
-                <div style={{
-                  width: 90,
-                  height: 90,
-                  borderRadius: 16,
-                  background: '#222',
-                  flexShrink: 0,
-                  overflow: 'hidden'
-                }}>
-                  {/* Здесь можно добавить мини-карту или изображение локации */}
+              <div className={styles.locationModalInfo}>
+                <div className={styles.locationModalImage}>
+                   Здесь можно добавить мини-карту или изображение локации 
                 </div>
                 <div style={{flex: 1}}>
                   <div style={{fontSize: 16, marginBottom: 8}}>11 оповещений за последние 24 часа</div>
-                  <button style={{
-                    background: '#e53935',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 20,
-                    padding: '8px 16px',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6
-                  }}
+                  <button 
+                    className={styles.locationModalButton}
                     onClick={() => {
                       setShowLocationModal(false);
                       setShowGoLiveModal(true);
@@ -1297,54 +1303,39 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                 </div>
               </div>
 
-              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8}}>
-                <button style={{
-                  flex: 1,
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6
-                }}>
+              <div className={styles.locationModalActions}>
+                <button className={styles.locationModalAction}>
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                   </svg>
                   0
                 </button>
-                <button style={{
-                  flex: 1,
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6
-                }}>
-                  <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 8v8M8 12h8"/>
-                  </svg>
-                  Подписаться
+                <button 
+                  onClick={() => toggleSubscription(99999)} // ID для местоположения
+                  className={styles.locationModalAction}
+                >
+                  {isSubscribed(99999) ? (
+                    <>
+                      <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9 12l2 2 4-4"/>
+                      </svg>
+                      Подписан
+                    </>
+                  ) : (
+                    <>
+                      <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 8v8M8 12h8"/>
+                      </svg>
+                      Подписаться
+                    </>
+                  )}
                 </button>
-                <button style={{
-                  flex: 1,
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6
-                }}>
+                <button 
+                  onClick={() => handleShare()}
+                  className={styles.locationModalAction}
+                >
                   <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M4 12h16M14 6l6 6-6 6"/>
                   </svg>
@@ -1353,62 +1344,46 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
               </div>
             </div>
           </div>
-        )}
+        ) */}
 
         {/* Полноэкранная модалка Go Live */}
         {showGoLiveModal && cameraAllowed !== false && (
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            background: '#000',
-            zIndex: 3000,
-            width: '100vw',
-            height: '100dvh',
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
+          <div className={styles.goLiveModal}>
             {/* Верхняя панель */}
-            <div style={{padding: '32px 20px 0 20px', color: '#fff'}}>
-              <div style={{fontSize: 32, fontWeight: 700, marginBottom: 8}}>Начать трансляцию</div>
-              <div style={{fontSize: 18, color: '#ccc', marginBottom: 0}}>12 граждан в радиусе 1.5 км</div>
-              <button onClick={handleCloseGoLive} style={{position: 'absolute', top: 24, right: 20, width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <div className={styles.goLiveHeader}>
+              <div className={styles.textBlock}>
+                <div className={styles.goLiveTitle}>Начать трансляцию</div>
+                <div className={styles.goLiveSubtitle}>12 граждан в радиусе 1.5 км</div>
+              </div>
+              <button onClick={handleCloseGoLive} className={styles.goLiveCloseButton}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M7 10l5 5 5-5"/></svg>
               </button>
             </div>
             {/* Видео */}
-            <video ref={videoRef} autoPlay playsInline style={{flex: 1, width: '100%', height: '100%', objectFit: 'cover', background: '#000', display: 'block', position: 'absolute', top: 0, left: 0, zIndex: -1}} />
+            <video ref={videoRef} autoPlay playsInline className={styles.goLiveVideo} />
             {/* Нижняя панель */}
-            <div style={{position: 'absolute', left: 0, right: 0, bottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-evenly'}}>
+            <div className={styles.goLiveControls}>
               {/* Кнопка переключения камеры, только если камер больше одной */}
-              {videoDevices.length > 1 && (
-                <button onClick={handleSwitchCamera} style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <div className={styles.goLiveSwitchButton}>
+{videoDevices.length > 1 && (
+                <button onClick={handleSwitchCamera} >
                   <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M28 18a10 10 0 1 1-4.1-7.98" stroke="#FFF" strokeWidth="3" fill="none" strokeLinecap="round"/>
   <path d="M24 6v6h6" stroke="#FFF" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
 </svg></button>
               )}
-              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 24px'}}>
-                <div style={{display: 'flex', gap: 24, marginBottom: 12}}>
+              </div>
+              
+              <div className={styles.goLiveTabContainer}>
+                <div className={styles.goLiveTabs}>
                   <span 
-                    style={{
-                      color: '#fff', 
-                      fontWeight: activeTab === 'Инцидент' ? 700 : 500, 
-                      fontSize: 20,
-                      opacity: activeTab === 'Инцидент' ? 1 : 0.7,
-                      cursor: 'pointer'
-                    }}
+                    className={`${styles.goLiveTab} ${activeTab === 'Инцидент' ? styles.active : ''}`}
                     onClick={() => setActiveTab('Инцидент')}
                   >
                     Инцидент
                   </span>
                   <span 
-                    style={{
-                      color: '#fff', 
-                      fontWeight: activeTab === 'Событие' ? 700 : 500, 
-                      fontSize: 20,
-                      opacity: activeTab === 'Событие' ? 1 : 0.7,
-                      cursor: 'pointer'
-                    }}
+                    className={`${styles.goLiveTab} ${activeTab === 'Событие' ? styles.active : ''}`}
                     onClick={() => setActiveTab('Событие')}
                   >
                     Событие
@@ -1416,29 +1391,12 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                 </div>
                 <button 
                   onClick={handleStartRecording}
-                  style={{
-                    width: 90, 
-                    height: 90, 
-                    borderRadius: '50%', 
-                    background: '#000', 
-                    border: '6px solid #fff', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    boxShadow: '0 0 0 4px #222',
-                    cursor: 'pointer'
-                  }}
+                  className={styles.goLiveRecordButton}
                 >
-                  <div style={{
-                    width: 64, 
-                    height: 64, 
-                    borderRadius: '50%', 
-                    background: activeTab === 'Инцидент' ? '#e53935' : '#43a047', 
-                    border: '4px solid #222'
-                  }}></div>
+                  <div className={`${styles.goLiveRecordInner} ${activeTab === 'Инцидент' ? styles.incident : styles.event}`}></div>
                 </button>
               </div>
-              <button style={{background: 'none', border: 'none', color: '#fff', fontSize: 32, margin: '0 24px'}}>
+              <button className={styles.goLiveExtraButton}>
                 <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16"/><path d="M18 10v16"/><path d="M10 18h16"/></svg>
               </button>
             </div>
@@ -1446,69 +1404,38 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
         )}
 
         {showVideoModal && videoIncident && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 4000, background: '#000',
-            width: '100vw', height: '100dvh',
-            overflow: 'hidden',
-          }}>
+          <div className={styles.videoModal}>
             {/* Видео на весь экран */}
             <video 
               src={videoIncident.video} 
               autoPlay 
               playsInline
-              style={{
-                position: 'absolute',
-                top: 0, left: 0, width: '100vw', height: '100dvh',
-                objectFit: 'cover',
-                zIndex: 4000,
-                background: '#000'
-              }}
+              className={styles.videoModalVideo}
             />
             {/* Верхняя панель поверх видео */}
-            <div style={{
-              position: 'absolute',
-              top: 0, left: 0, right: 0,
-              zIndex: 4100,
-              display: 'flex', alignItems: 'center', padding: 16
-            }}>
-              <img src={videoIncident.image} alt="" style={{width: 40, height: 40, borderRadius: '50%', marginRight: 12}} />
-              <span style={{color: '#fff', fontWeight: 700, fontSize: 18}}>{videoIncident.title}</span>
-              <span style={{background: '#e53935', color: '#fff', borderRadius: 8, padding: '2px 8px', marginLeft: 12, fontWeight: 600, fontSize: 14}}>ПРЯМОЙ ЭФИР</span>
-              <span style={{color: '#fff', marginLeft: 'auto', fontSize: 16}}>👁 {videoIncident.views}</span>
-              <button onClick={() => setShowVideoModal(false)} style={{marginLeft: 16, background: 'none', border: 'none', color: '#fff', fontSize: 28, cursor: 'pointer'}}>&times;</button>
+            <div className={styles.videoModalHeader}>
+              <img src={videoIncident.image} alt="" className={styles.videoModalAvatar} />
+              {/* <span className={styles.videoModalTitle}>{videoIncident.title}</span> */}
+              <span className={styles.videoModalLive}>ПРЯМОЙ ЭФИР</span>
+              <span className={styles.videoModalViews}>👁 {videoIncident.views}</span>
+              <button onClick={() => setShowVideoModal(false)} className={styles.videoModalClose}>&times;</button>
             </div>
             {/* Чат поверх видео, снизу */}
-            <div style={{
-              position: 'absolute',
-              left: 0, right: 0, bottom: 0,
-              height: '40dvh',
-              background: 'linear-gradient(to top, rgba(0, 0, 0, 0.7)  33%, rgb(0, 0, 0, 0.5) 73%, rgba(0, 0, 0, 0))',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              zIndex: 4100
-            }}>
-              <div style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-end'
-              }}>
+            <div className={styles.videoModalChat}>
+              <div className={styles.videoModalMessages}>
                 {videoIncident.comments.map(c => (
-                  <div key={c.id} style={{color: '#fff', marginBottom: 8}}>
-                    <b>{c.user}:</b> {c.text} <span style={{color: '#aaa', fontSize: 12}}>{c.time}</span>
+                  <div key={c.id} className={styles.videoModalMessage}>
+                    <b>{c.user}:</b> {c.text} <span className={styles.videoModalMessageTime}>{c.time}</span>
                   </div>
                 ))}
                 <div ref={chatEndRef} />
               </div>
-              <div style={{display: 'flex', padding: 12}}>
+              <div className={styles.videoModalInputContainer}>
                 <input
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
                   placeholder="Комментарий"
-                  style={{flex: 1, borderRadius: 24, border: 'none', background: '#222', color: '#fff', fontSize: 17, padding: '12px 16px', outline: 'none'}}
+                  className={styles.videoModalInput}
                 />
                 <button
                   onClick={() => {
@@ -1523,7 +1450,7 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
                       setCommentText('');
                     }
                   }}
-                  style={{background: '#1856f5', color: '#fff', border: 'none', borderRadius: 24, fontWeight: 700, fontSize: 17, padding: '10px 18px', marginLeft: 4, cursor: 'pointer'}}
+                  className={styles.videoModalSendButton}
                 >Отправить</button>
               </div>
             </div>
@@ -1535,27 +1462,27 @@ const MapPage: React.FC<{ onShowRealMapChange?: (show: boolean) => void }> = ({ 
 
   // Экран с кнопкой только если разрешение не получено
   return (
-    <div style={{height: '100dvh', width: '100vw', background: '#000', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative'}}>
-      <div style={{marginBottom: 32, textAlign: 'center', padding: '0 12px'}}>
-        <div style={{fontSize: 20, fontWeight: 700, marginBottom: 12}}>Откройте для себя мир без границ с премиум-подпиской!</div>
-        <div style={{fontSize: 16, opacity: 0.7, marginBottom: 24}}>Что ждёт вас в премиум-клубе:</div>
-        <ul style={{textAlign: 'left', fontSize: 18, lineHeight: 1.5, margin: '0 auto 24px auto', maxWidth: 400, paddingLeft: 16}}>
+    <div className={styles.initialScreen}>
+      <div className={styles.initialContent}>
+        <div className={styles.initialTitle}>Откройте для себя мир без границ с премиум-подпиской!</div>
+        <div className={styles.initialSubtitle}>Что ждёт вас в премиум-клубе:</div>
+        <ul className={styles.initialFeatures}>
           {DEMO_FEATURES.map((f, i) => (
-            <li key={i} style={{marginBottom: 10, listStyle: 'none', fontSize: 14, display: 'flex', flexDirection: 'row'}}>
-              <span style={{color: '#1856f5', marginRight: 8}}>✔</span> <span dangerouslySetInnerHTML={{__html: f}} />
+            <li key={i} className={styles.initialFeature}>
+              <span className={styles.initialFeatureIcon}>✔</span> <span dangerouslySetInnerHTML={{__html: f}} />
             </li>
           ))}
         </ul>
-        <div style={{fontSize: 12, opacity: 0.7, marginBottom: 24}}>
+        <div className={styles.initialDescription}>
           Станьте частью элитарного сообщества уже сегодня. Ваш комфорт — наш приоритет!
         </div>
         <button
-          style={{background: '#1856f5', color: '#fff', fontSize: 16, border: 'none', borderRadius: 32, padding: '16px 32px', width: 320, maxWidth: '90vw', fontWeight: 700, cursor: 'pointer'}}
+          className={styles.initialButton}
           onClick={handleShowLocation}
         >
           Присоединиться!
         </button>
-        {error && <div style={{color: 'red', marginTop: 16}}>{error}</div>}
+        {error && <div className={styles.initialError}>{error}</div>}
       </div>
     </div>
   );

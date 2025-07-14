@@ -33,6 +33,40 @@ const AppContent: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [showRealMap, setShowRealMap] = useState(false);
 
+  const handleOpenGoLive = () => {
+    // Сначала проверяем доступ к камере
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        // Если доступ получен, останавливаем поток и продолжаем
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Проверяем, находимся ли мы на главной странице
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '/citizen' && currentPath !== '/citizen/') {
+          // Если не на главной, сначала переходим на главную
+          navigate('/');
+          // Ждем немного, чтобы страница загрузилась, затем открываем модалку
+          setTimeout(() => {
+            const openGoLiveModal = (window as Window & { openGoLiveModal?: () => void }).openGoLiveModal;
+            if (openGoLiveModal) {
+              openGoLiveModal();
+            }
+          }, 100);
+        } else {
+          // Если уже на главной, сразу открываем модалку
+          const openGoLiveModal = (window as Window & { openGoLiveModal?: () => void }).openGoLiveModal;
+          if (openGoLiveModal) {
+            openGoLiveModal();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка доступа к камере:', error);
+        // Показываем уведомление пользователю о необходимости разрешить доступ к камере
+        alert('Для использования функции "Go Live" необходимо разрешить доступ к камере. Пожалуйста, обновите разрешения в настройках браузера.');
+      });
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
     
@@ -50,7 +84,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<MapPage onShowRealMapChange={setShowRealMap} />} />
+        <Route path="/" element={<MapPage onShowRealMapChange={setShowRealMap} onOpenGoLive={handleOpenGoLive} />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
@@ -71,13 +105,13 @@ const AppContent: React.FC = () => {
               className={styles.bottomNavCircle}
               aria-label="Открыть модальное окно"
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-              onClick={() => setModalOpen(true)}
+              onClick={handleOpenGoLive}
             >
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="24" cy="24" r="24" fill="#1856f5"/>
+                <circle cx="24" cy="24" r="24" fill="#e53935"/>
                 <g filter="url(#glow)">
                   <path d="M24 12C18 12 14 15.5 14 21.5C14 32 24 36 24 36C24 36 34 32 34 21.5C34 15.5 30 12 24 12Z" fill="white"/>
-                  <circle cx="24" cy="24" r="5" fill="#1856f5"/>
+                  <circle cx="24" cy="24" r="5" fill="#e53935"/>
                 </g>
                 <defs>
                   <filter id="glow" x="0" y="0" width="48" height="48" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
