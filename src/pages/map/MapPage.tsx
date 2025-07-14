@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom'; 
 import styles from './map.module.scss';
-import { startSimulation, getSimulationState, addCommentToPoint } from '../../utils/simulation';
+import { startSimulation, getSimulationState, addCommentToPoint, updateSimulationCenter } from '../../utils/simulation';
 import type { SimulationPoint } from '../../utils/simulation';
 
 const DEMO_FEATURES = [
@@ -538,6 +538,33 @@ function SetViewOnLocation({ position }: { position: [number, number] }) {
   return null;
 }
 
+// Компонент для отслеживания центра карты
+function MapCenterTracker({ onCenterChange }: { onCenterChange: (center: [number, number]) => void }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    const handleMove = () => {
+      const center = map.getCenter();
+      const centerCoords: [number, number] = [center.lat, center.lng];
+      onCenterChange(centerCoords);
+      // Обновляем центр симуляции без сброса
+      updateSimulationCenter(centerCoords);
+    };
+    
+    map.on('move', handleMove);
+    // Инициализируем центр при загрузке
+    const center = map.getCenter();
+    const centerCoords: [number, number] = [center.lat, center.lng];
+    onCenterChange(centerCoords);
+    
+    return () => {
+      map.off('move', handleMove);
+    };
+  }, [map, onCenterChange]);
+  
+  return null;
+}
+
 // Кастомная функция для создания иконки
 function getIncidentIcon(image?: string, color?: string) {
   // Всегда используем изображение, если оно есть
@@ -619,6 +646,11 @@ const MapPage: React.FC<{
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [hidePremiumButton, setHidePremiumButton] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([55.7558, 37.6173]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingProgress, setRecordingProgress] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingIntervalRef = useRef<number | null>(null);
 
   // Функция для обновления состояния из localStorage
   const updateStateFromStorage = useCallback(() => {
@@ -636,8 +668,11 @@ const MapPage: React.FC<{
 
   // Эффект для запуска симуляции при получении позиции
   useEffect(() => {
-    if (position) {
-      startSimulation(position);
+    // Используем позицию пользователя или текущий центр карты
+    const centerPosition = position || mapCenter;
+    // Запускаем симуляцию только один раз при инициализации
+    if (!getSimulationState().isRunning) {
+      startSimulation(centerPosition);
     }
   }, [position]);
 
@@ -661,8 +696,7 @@ const MapPage: React.FC<{
   }, [updateStateFromStorage]);
 
   // Сначала показываем карту, затем проверяем разрешение на геолокацию
-  useEffect(() => { 
-    
+  useEffect(() => {     
     // Проверяем только если разрешение уже дано
     if (!navigator.permissions || !navigator.geolocation) {
       console.log('Geolocation not supported');
@@ -814,6 +848,18 @@ const MapPage: React.FC<{
   // Функция для закрытия Go Live
   const handleCloseGoLive = () => {
     setShowGoLiveModal(false);
+    // Останавливаем запись если она идет
+    if (isRecording) {
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setIsRecording(false);
+      setRecordingProgress(0);
+    }
     if (videoRef.current) {
       const stream = videoRef.current.srcObject as MediaStream;
       if (stream) {
@@ -823,9 +869,23 @@ const MapPage: React.FC<{
     }
   };
 
-  // Функция для начала записи
+  // Функция для начала/остановки записи
   const handleStartRecording = () => {
-    if (position && videoRef.current?.srcObject) {
+    if (isRecording) {
+      // Останавливаем запись
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setIsRecording(false);
+      setRecordingProgress(0);
+      return;
+    }
+
+    if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       const mediaRecorder = new MediaRecorder(stream);
       const chunks: Blob[] = [];
@@ -840,9 +900,21 @@ const MapPage: React.FC<{
         const blob = new Blob(chunks, { type: 'video/mp4' });
         const videoUrl = URL.createObjectURL(blob);
 
+        // Останавливаем камеру после записи
+        if (videoRef.current) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+          }
+          videoRef.current.srcObject = null;
+        }
+
+        // Используем позицию пользователя или текущий центр карты
+        const centerPosition = position || mapCenter;
+
         const newPoint: SimulationPoint = {
           id: Date.now(),
-          position: position,
+          position: centerPosition,
           title: activeTab === 'Инцидент' ? 'Новый инцидент' : 'Новое событие',
           address: 'Ваше местоположение',
           description: 'Прямая трансляция',
@@ -867,19 +939,31 @@ const MapPage: React.FC<{
 
       // Начинаем запись
       mediaRecorder.start();
-      
-      // Останавливаем запись через 10 секунд
-      setTimeout(() => {
-        mediaRecorder.stop();
-        // Останавливаем камеру после записи
-        if (videoRef.current) {
-          const stream = videoRef.current.srcObject as MediaStream;
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+      setRecordingProgress(0);
+ 
+      const startTime = Date.now();
+      const duration = 30000; // 30 секунд
+
+      recordingIntervalRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min((elapsed / duration) * 100, 100);
+        setRecordingProgress(progress);
+
+        if (progress >= 100) {
+          // Автоматически останавливаем запись через минуту
+          if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
           }
-          videoRef.current.srcObject = null;
+          if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current);
+            recordingIntervalRef.current = null;
+          }
+          setIsRecording(false);
+          setRecordingProgress(0);
         }
-      }, 10000);
+      }, 100); // Обновляем каждые 100мс для плавной анимации
     }
   };
 
@@ -1050,6 +1134,7 @@ const MapPage: React.FC<{
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             attribution="&copy; <a href='https://carto.com/attributions'>CARTO</a>"
           />
+          <MapCenterTracker onCenterChange={setMapCenter} />
           {position && (
             <Marker 
               position={position as [number, number]} 
@@ -1278,7 +1363,34 @@ const MapPage: React.FC<{
                   onClick={handleStartRecording}
                   className={styles.goLiveRecordButton}
                 >
-                  <div className={`${styles.goLiveRecordInner} ${activeTab === 'Инцидент' ? styles.incident : styles.event}`}></div>
+                  {isRecording ? (
+                    <div className={styles.goLiveRecordButtonRecording}>
+                      <svg className={styles.goLiveRecordProgress} viewBox="0 0 100 100">
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke="rgba(255,255,255,0.3)"
+                          strokeWidth="4"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="45"
+                          fill="none"
+                          stroke="#fff"
+                          strokeWidth="4"
+                          strokeDasharray={`${2 * Math.PI * 45}`}
+                          strokeDashoffset={`${2 * Math.PI * 45 * (1 - recordingProgress / 100)}`}
+                          transform="rotate(-90 50 50)"
+                        />
+                      </svg>
+                      <div className={`${styles.goLiveRecordInner} ${activeTab === 'Инцидент' ? styles.incident : styles.event}`}></div>
+                    </div>
+                  ) : (
+                    <div className={`${styles.goLiveRecordInner} ${activeTab === 'Инцидент' ? styles.incident : styles.event}`}></div>
+                  )}
                 </button>
               </div>
               <button className={styles.goLiveExtraButton}>

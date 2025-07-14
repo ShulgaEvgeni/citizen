@@ -67,6 +67,11 @@ const AppContent: React.FC = () => {
   };
 
   useEffect(() => {
+    // Очищаем симуляцию при инициализации
+    localStorage.removeItem('simulationState');
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2000);
     
     // Проверяем наличие isOnboarding в localStorage

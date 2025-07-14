@@ -30,18 +30,23 @@ interface SimulationState {
   startTime: number;
   isRunning: boolean;
   commentsIntervals: { [key: number]: number }; // Хранит ID интервалов для каждой точки
+  center?: [number, number]; // Центр симуляции
 }
 
-const SIMULATION_DURATION = 7 * 60 * 1000; // 7 минут в миллисекундах
+const SIMULATION_DURATION = 2 * 60 * 1000; // 7 минут в миллисекундах
 const POINTS_INTERVAL = 30000; // Интервал появления точек (30 секунд)
 const COMMENTS_INTERVAL = 5000; // Уменьшаем интервал комментариев до 5 секунд
 const RESPONSE_DELAY = 2000; // Задержка ответа на сообщение пользователя (2 секунды)
 
-export const generateRandomPoint = (userPosition: [number, number]): SimulationPoint => {
+export const generateRandomPoint = (userPosition?: [number, number]): SimulationPoint => {
+  // Используем переданную позицию или центр из состояния симуляции
+  const state = getSimulationState();
+  const center = userPosition || state.center || [55.7558, 37.6173];
+  
   const randomAngle = Math.random() * 2 * Math.PI;
   const randomDistance = Math.random() * 0.01; // Примерно 1 км
-  const lat = userPosition[0] + randomDistance * Math.cos(randomAngle);
-  const lng = userPosition[1] + randomDistance * Math.sin(randomAngle);
+  const lat = center[0] + randomDistance * Math.cos(randomAngle);
+  const lng = center[1] + randomDistance * Math.sin(randomAngle);
 
   const randomIncident = INCIDENTS[Math.floor(Math.random() * INCIDENTS.length)];
 
@@ -146,7 +151,8 @@ export const startSimulation = (userPosition: [number, number]) => {
     points: [],
     startTime: Date.now(),
     isRunning: true,
-    commentsIntervals: {}
+    commentsIntervals: {},
+    center: userPosition
   };
   
   localStorage.setItem('simulationState', JSON.stringify(initialState));
@@ -155,7 +161,7 @@ export const startSimulation = (userPosition: [number, number]) => {
   setTimeout(() => {
     const state = getSimulationState();
     if (state.isRunning) {
-      const newPoint = generateRandomPoint(userPosition);
+      const newPoint = generateRandomPoint();
       state.points.push(newPoint);
       localStorage.setItem('simulationState', JSON.stringify(state));
       
@@ -172,7 +178,7 @@ export const startSimulation = (userPosition: [number, number]) => {
       return;
     }
 
-    const newPoint = generateRandomPoint(userPosition);
+    const newPoint = generateRandomPoint();
     state.points.push(newPoint);
     localStorage.setItem('simulationState', JSON.stringify(state));
     
@@ -197,6 +203,15 @@ export const startSimulation = (userPosition: [number, number]) => {
 
 export const getSimulationState = (): SimulationState => {
   return JSON.parse(localStorage.getItem('simulationState') || '{"points":[],"isRunning":false,"commentsIntervals":{}}');
+};
+
+export const updateSimulationCenter = (newCenter: [number, number]) => {
+  const state = getSimulationState();
+  if (state.isRunning) {
+    // Обновляем центр симуляции без сброса
+    state.center = newCenter;
+    localStorage.setItem('simulationState', JSON.stringify(state));
+  }
 };
 
 export const addCommentToPoint = (pointId: number, comment: SimulationPoint['comments'][0]) => {
